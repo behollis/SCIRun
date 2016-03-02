@@ -36,8 +36,7 @@ script:
   - cd bin
   - cmake -DDOWNLOAD_TOOLKITS:BOOL=OFF -DRUN_BASIC_REGRESSION_TESTS:BOOL=OFF ../Superbuild
   - make -j4
-#  make SCIRunTestData_external
-#  && make test
+  - make test
 
 notifications:
   slack: sciinstitute:lZnpQQXNd4Io5iGDPQDpJmI1
