@@ -47,7 +47,6 @@
 
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm/copy.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 #include <Core/Python/PythonDatatypeConverter.h>
 
 using namespace SCIRun;
@@ -258,7 +257,7 @@ namespace
   class PyPortsImpl : public PyPorts
   {
   public:
-    PyPortsImpl(ModuleHandle mod, bool input, NetworkEditorController& nec) : nec_(nec), modId_(mod->get_id())
+    PyPortsImpl(ModuleHandle mod, bool input, NetworkEditorController& nec) : mod_(mod), nec_(nec), modId_(mod->get_id())
     {
       //wish:
       //boost::push_back(ports_,
@@ -267,13 +266,17 @@ namespace
       //  );
       if (input)
       {
-        for (const auto& p : mod->inputPorts())
-          ports_.push_back(boost::make_shared<PyPortImpl>(p, nec_));
+        setupInputs();
+
+        if (mod->hasDynamicPorts())
+        {
+          nec_.connectPortAdded([this](const ModuleId& mid, const PortId& pid) { portAddedSlot(mid, pid); });
+          nec_.connectPortRemoved([this](const ModuleId& mid, const PortId& pid) { portRemovedSlot(mid, pid); });
+        }
       }
       else
       {
-        for (const auto& p : mod->outputPorts())
-          ports_.push_back(boost::make_shared<PyPortImpl>(p, nec_));
+        setupOutputs();
       }
     }
 
@@ -315,7 +318,32 @@ namespace
       ports_.clear();
     }
   private:
+    void portAddedSlot(const ModuleId& mid, const PortId& pid)
+    {
+      setupInputs();
+    }
+
+    void portRemovedSlot(const ModuleId& mid, const PortId& pid)
+    {
+      setupInputs();
+    }
+
+    void setupInputs()
+    {
+      ports_.clear();
+      for (const auto& p : mod_->inputPorts())
+        ports_.push_back(boost::make_shared<PyPortImpl>(p, nec_));
+    }
+
+    void setupOutputs()
+    {
+      ports_.clear();
+      for (const auto& p : mod_->outputPorts())
+        ports_.push_back(boost::make_shared<PyPortImpl>(p, nec_));
+    }
+
     std::vector<boost::shared_ptr<PyPortImpl>> ports_;
+    ModuleHandle mod_;
     NetworkEditorController& nec_;
     ModuleId modId_;
   };
@@ -424,11 +452,11 @@ namespace
           {
             throw std::invalid_argument("Module state key " + name + " not defined.");
           }
-          state->setValue(apn, convert(object).value());
+          state->setValue(apn, convertPythonObjectToVariable(object).value());
         }
         else
         {
-          state->setTransientValue(apn, convert(object), false);
+          state->setTransientValue(apn, convertPythonObjectToVariable(object), false);
         }
       }
     }
@@ -442,7 +470,7 @@ namespace
         std::transform(keys.begin(), keys.end(), std::back_inserter(keyStrings), [](const AlgorithmParameterName& n) { return n.name_; });
         return keyStrings;
       }
-      return std::vector<std::string>();
+      return {};
     }
 
     virtual std::string stateToString() const override
@@ -474,97 +502,6 @@ namespace
     ModuleHandle module_;
     NetworkEditorController& nec_;
     boost::shared_ptr<PyPortsImpl> input_, output_;
-
-//TODO: extract and use for state get/set
-    Variable convert(const boost::python::object& object) const
-    {
-      /// @todo: yucky
-      {
-        boost::python::extract<int> e(object);
-        if (e.check())
-        {
-          return makeVariable("int", e());
-        }
-      }
-      {
-        boost::python::extract<double> e(object);
-        if (e.check())
-        {
-          return makeVariable("double", e());
-        }
-      }
-      {
-        boost::python::extract<std::string> e(object);
-        if (e.check())
-        {
-          return makeVariable("string", e());
-        }
-      }
-      {
-        boost::python::extract<bool> e(object);
-        if (e.check())
-        {
-          return makeVariable("bool", e());
-        }
-      }
-      {
-        boost::python::extract<boost::python::list> e(object);
-        if (e.check())
-        {
-          auto list = e();
-          auto length = len(list);
-          bool makeDense;
-          DenseMatrixHandle dense;
-          if (length > 0)
-          {
-            boost::python::extract<boost::python::list> firstRow(list[0]);
-            if (firstRow.check())
-            {
-              makeDense = true;
-              dense.reset(new DenseMatrix(length, len(firstRow)));
-            }
-            else
-            {
-              boost::python::extract<std::string> innerString(list[0]);
-              if (innerString.check())
-                makeDense = false;
-              else
-                throw std::invalid_argument("Ill-formed list.");
-            }
-          }
-          else
-          {
-            throw std::invalid_argument("Empty list.");
-          }
-          if (makeDense)
-          {
-            for (int i = 0; i < length; ++i)
-            {
-              boost::python::extract<boost::python::list> rowList(list[i]);
-              if (rowList.check())
-              {
-                auto row = rowList();
-                if (len(row) != dense->ncols())
-                  throw std::invalid_argument("Attempted to convert into dense matrix but row lengths are not all equal.");
-                for (int j = 0; j < len(row); ++j)
-                {
-                  (*dense)(i,j) = boost::python::extract<double>(row[j]);
-                }
-              }
-            }
-          }
-          else //sparse
-          {
-            std::cout << "TODO: sparse matrix conversion" << std::endl;
-          }
-
-          Variable x(Name("dense matrix"), dense, Variable::DATATYPE_VARIABLE);
-          return x;
-        }
-      }
-      std::cerr << "No known conversion from python object to C++ object" << std::endl;
-      return Variable();
-    }
   };
 }
 
