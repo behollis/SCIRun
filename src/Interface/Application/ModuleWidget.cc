@@ -735,14 +735,14 @@ void ModuleWidget::createInputPorts(const ModuleInfoProvider& moduleInfoProvider
     if (dialog_ && port->isDynamic())
     {
       auto portConstructionType = INITIAL_PORT_CONSTRUCTION;
-      auto nameMatches = [&](const InputPortHandle& in) 
-      { 
+      auto nameMatches = [&](const InputPortHandle& in)
+      {
         return in->id().name == port->id().name;
       };
       auto justAddedIndex = i - 1;
       bool isNotLastDynamicPortOfThisName = justAddedIndex < inputs.size() - 1
         && std::find_if(inputs.cbegin() + justAddedIndex + 1, inputs.cend(), nameMatches) != inputs.cend();
-      //qDebug() << "UPDATE FROM PORT CHANGE TYPE CHECK:" << isNotLastDynamicPortOfThisName << justAddedIndex << inputs.size() << (justAddedIndex < inputs.size() - 1) 
+      //qDebug() << "UPDATE FROM PORT CHANGE TYPE CHECK:" << isNotLastDynamicPortOfThisName << justAddedIndex << inputs.size() << (justAddedIndex < inputs.size() - 1)
         //<< ((justAddedIndex < inputs.size() - 1) && (std::find_if(inputs.cbegin() + justAddedIndex + 1, inputs.cend(), nameMatches) != inputs.end()));
       if (isNotLastDynamicPortOfThisName)
         portConstructionType = USER_ADDED_PORT_DURING_FILE_LOAD;
@@ -895,6 +895,11 @@ void PortWidgetManager::addPort(InputPortWidget* port)
   inputPorts_.push_back(port);
 }
 
+void PortWidgetManager::insertPort(int index, InputPortWidget* port)
+{
+  inputPorts_.insert(inputPorts_.begin() + index, port);
+}
+
 void PortWidgetManager::setHighlightPorts(bool on)
 {
   for (auto& port : getAllPorts())
@@ -914,9 +919,13 @@ void ModuleWidget::addDynamicPort(const ModuleId& mid, const PortId& pid)
     auto w = new InputPortWidget(QString::fromStdString(port->get_portname()), to_color(PortColorLookup::toColor(type)), type, mid, port->id(), port->getIndex(), port->isDynamic(), connectionFactory_, closestPortFinder_, PortDataDescriber(), this);
     hookUpGeneralPortSignals(w);
     connect(this, SIGNAL(connectionAdded(const SCIRun::Dataflow::Networks::ConnectionDescription&)), w, SLOT(MakeTheConnection(const SCIRun::Dataflow::Networks::ConnectionDescription&)));
-    ports_->addPort(w);
+
+    const int newPortIndex = port->getIndex();
+
+    ports_->insertPort(newPortIndex, w);
     ports_->reindexInputs();
-    inputPortLayout_->addWidget(w);
+
+    inputPortLayout_->insertWidget(newPortIndex, w);
 
     Q_EMIT dynamicPortChanged(pid.toString(), true);
   }
@@ -924,7 +933,7 @@ void ModuleWidget::addDynamicPort(const ModuleId& mid, const PortId& pid)
 
 void ModuleWidget::removeDynamicPort(const ModuleId& mid, const PortId& pid)
 {
-  if (mid.id_ == moduleId_ && !deleting_)
+  if (mid.id_ == moduleId_ && !deleting_ && !networkBeingCleared_)
   {
     if (ports_->removeDynamicPort(pid, inputPortLayout_))
     {
@@ -961,8 +970,22 @@ void ModuleWidget::printPortPositions() const
   std::cout << std::endl;
 }
 
+bool ModuleWidget::networkBeingCleared_(false);
+
+ModuleWidget::NetworkClearingScope::NetworkClearingScope()
+{
+  networkBeingCleared_ = true;
+}
+
+ModuleWidget::NetworkClearingScope::~NetworkClearingScope()
+{
+  networkBeingCleared_ = false;
+}
+
 ModuleWidget::~ModuleWidget()
 {
+  disconnect(this, SIGNAL(dynamicPortChanged(const std::string&, bool)), this, SLOT(updateDialogForDynamicPortChange(const std::string&, bool)));
+
   if (!theModule_->isStoppable())
   {
     removeWidgetFromExecutionDisableList(miniWidgetDisplay_->getExecuteButton());
@@ -1169,7 +1192,7 @@ void ModuleWidget::updateDockWidgetProperties(bool isFloating)
 
 void ModuleWidget::updateDialogForDynamicPortChange(const std::string& portId, bool adding)
 {
-  if (dialog_)
+  if (dialog_ && !deleting_ && !networkBeingCleared_)
     dialog_->updateFromPortChange(numInputPorts(), portId, adding ? USER_ADDED_PORT : USER_REMOVED_PORT);
 }
 

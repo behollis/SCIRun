@@ -63,7 +63,7 @@ namespace Networks {
       const std::string& version = "1.0");
     virtual ~Module() override;
 
-    virtual std::string get_module_name() const override { return info_.module_name_; }
+    virtual std::string get_module_name() const override final { return info_.module_name_; }
     std::string get_categoryname() const { return info_.category_name_; }
     std::string get_packagename() const { return info_.package_name_; }
     ModuleId get_id() const { return id_; }
@@ -264,7 +264,7 @@ namespace Networks {
 
     //For modules that need to initialize some internal state signal/slots, this needs to be called after set_state to reinitialize.
     virtual void postStateChangeInternalSignalHookup() {}
-    void sendFeedbackUpstreamAlongIncomingConnections(const ModuleFeedback& feedback);
+    void sendFeedbackUpstreamAlongIncomingConnections(const ModuleFeedback& feedback) const;
 
   private:
     template <class T>

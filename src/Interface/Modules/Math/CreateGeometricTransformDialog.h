@@ -26,53 +26,46 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef INTERFACE_APPLICATION_PORTWIDGETMANAGER_H
-#define INTERFACE_APPLICATION_PORTWIDGETMANAGER_H
+#ifndef INTERFACE_MODULES_MATH_CREATEGEOMETRICTRANSFORMDIALOG_H
+#define INTERFACE_MODULES_MATH_CREATEGEOMETRICTRANSFORMDIALOG_H 1
 
-#ifndef Q_MOC_RUN
-#include <boost/range/join.hpp>
-
-#include <Dataflow/Network/NetworkFwd.h>
-#endif
+#include "Interface/Modules/Math/ui_CreateGeometricTransform.h"
+#include <Interface/Modules/Base/ModuleDialogGeneric.h>
+#include <Interface/Modules/Math/share.h>
 
 namespace SCIRun {
-namespace Gui {
+  namespace Gui {
+    class SCISHARE CreateGeometricTransformDialog : public ModuleDialogGeneric,
+      public Ui::CreateGeometricTransform
+    {
+      Q_OBJECT
+      
+    public:
+      CreateGeometricTransformDialog(const std::string& name,
+        SCIRun::Dataflow::Networks::ModuleStateHandle state,
+        QWidget* parent = 0);
 
-class PortWidget;
-class InputPortWidget;
-class OutputPortWidget;
+    protected:
+      virtual void pullSpecial() override;
 
-class PortWidgetManager
-{
-public:
-  typedef std::deque<PortWidget*> Ports;
-
-  auto getAllPorts() const -> decltype(boost::join(Ports(), Ports()))
-  {
-    return boost::join(inputPorts_, outputPorts_);
+    private Q_SLOTS:
+      void changeTransformType(int index);
+      void resetValues();
+      void resetFieldMap();
+      void resetWidget();
+      void cycleUp();
+      void cycleDown();
+      void swapXY();
+      void swapYZ();
+      void swapXZ();
+      void flipX();
+      void flipY();
+      void flipZ();
+      void applyTransform();
+      void compositeTransform();
+      void calculateLog(const QString& text);
+    };
   }
-
-  const Ports& inputs() const { return inputPorts_; }
-  const Ports& outputs() const { return outputPorts_; }
-
-  size_t numInputPorts() const { return inputPorts_.size(); }
-  size_t numOutputPorts() const { return outputPorts_.size(); }
-
-  void addPort(InputPortWidget* port);
-  void insertPort(int index, InputPortWidget* port);
-  void addPort(OutputPortWidget* port);
-  bool removeDynamicPort(const SCIRun::Dataflow::Networks::PortId& pid, QHBoxLayout* layout);
-  void addInputsToLayout(QHBoxLayout* layout);
-  void addOutputsToLayout(QHBoxLayout* layout);
-  void reindexInputs();
-  void setHighlightPorts(bool on);
-
-private:
-  Ports inputPorts_, outputPorts_;
-};
-
-
-}
 }
 
 #endif

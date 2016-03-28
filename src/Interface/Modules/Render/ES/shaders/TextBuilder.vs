@@ -6,7 +6,7 @@
    Copyright (c) 2015 Scientific Computing and Imaging Institute,
    University of Utah.
 
-   License for the specific language governing rights and limitations under
+
    Permission is hereby granted, free of charge, to any person obtaining a
    copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation
@@ -26,53 +26,24 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef INTERFACE_APPLICATION_PORTWIDGETMANAGER_H
-#define INTERFACE_APPLICATION_PORTWIDGETMANAGER_H
+// Uniforms
+uniform float    uAspectRatio  ;      
+uniform float    uWindowWidth  ;
+uniform vec4     uTrans        ;
 
-#ifndef Q_MOC_RUN
-#include <boost/range/join.hpp>
+// Attributes
+attribute vec3  aPos;
+attribute vec2  aTexCoord;
 
-#include <Dataflow/Network/NetworkFwd.h>
-#endif
+//Outputs
+varying vec2 fTexCoord;
 
-namespace SCIRun {
-namespace Gui {
-
-class PortWidget;
-class InputPortWidget;
-class OutputPortWidget;
-
-class PortWidgetManager
+void main( void )
 {
-public:
-  typedef std::deque<PortWidget*> Ports;
-
-  auto getAllPorts() const -> decltype(boost::join(Ports(), Ports()))
-  {
-    return boost::join(inputPorts_, outputPorts_);
-  }
-
-  const Ports& inputs() const { return inputPorts_; }
-  const Ports& outputs() const { return outputPorts_; }
-
-  size_t numInputPorts() const { return inputPorts_.size(); }
-  size_t numOutputPorts() const { return outputPorts_.size(); }
-
-  void addPort(InputPortWidget* port);
-  void insertPort(int index, InputPortWidget* port);
-  void addPort(OutputPortWidget* port);
-  bool removeDynamicPort(const SCIRun::Dataflow::Networks::PortId& pid, QHBoxLayout* layout);
-  void addInputsToLayout(QHBoxLayout* layout);
-  void addOutputsToLayout(QHBoxLayout* layout);
-  void reindexInputs();
-  void setHighlightPorts(bool on);
-
-private:
-  Ports inputPorts_, outputPorts_;
-};
-
-
+  float x_scale = 2. / uWindowWidth;
+  float y_scale = 2. / (uWindowWidth / uAspectRatio);
+  gl_Position = vec4(aPos.x * x_scale + uTrans.x - 1.0, 
+                     aPos.y * y_scale + uTrans.y - 1.0,
+                     0.0, 1.0);
+  fTexCoord = aTexCoord;
 }
-}
-
-#endif
