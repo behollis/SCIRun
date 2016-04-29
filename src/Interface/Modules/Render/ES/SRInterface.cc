@@ -87,7 +87,15 @@ namespace SCIRun {
       mContext(context),
       frameInitLimit_(frameInitLimit),
       mCamera(new SRCamera(*this)),  // Should come after all vars have been initialized.
-      clippingPlaneIndex_(0)
+      clippingPlaneIndex_(0),
+      mMatAmbient(0.2),
+      mMatDiffuse(1.0),
+      mMatSpecular(0.0),
+      mMatShine(2.0),
+      mFogIntensity(0.0),
+      mFogStart(0.0),
+      mFogEnd(1.0),
+      mFogColor(glm::vec4(0.0))
     {
       // Create default colormaps.
       //generateTextures();
@@ -350,15 +358,15 @@ namespace SCIRun {
           GLenum primitive = GL_TRIANGLES;
           switch (ibo.prim)
           {
-          case SpireIBO::POINTS:
+          case SpireIBO::PRIMITIVE::POINTS:
             primitive = GL_POINTS;
             break;
 
-          case SpireIBO::LINES:
+          case SpireIBO::PRIMITIVE::LINES:
             primitive = GL_LINES;
             break;
 
-          case SpireIBO::TRIANGLES:
+          case SpireIBO::PRIMITIVE::TRIANGLES:
           default:
             primitive = GL_TRIANGLES;
             break;
@@ -376,7 +384,7 @@ namespace SCIRun {
           {
             uint64_t entityID = getEntityIDForName(pass.passName, port);
 
-            if (pass.renderType == RENDER_VBO_IBO)
+            if (pass.renderType == RenderType::RENDER_VBO_IBO)
             {
               addVBOToEntity(entityID, pass.vboName);
               addIBOToEntity(entityID, pass.iboName);
@@ -626,6 +634,48 @@ namespace SCIRun {
       updateClippingPlanes();
     }
 
+    //set material factors
+    void SRInterface::setMaterialFactor(MatFactor factor, double value)
+    {
+      switch (factor)
+      {
+      case MAT_AMBIENT:
+        mMatAmbient = value;
+        break;
+      case MAT_DIFFUSE:
+        mMatDiffuse = value;
+        break;
+      case MAT_SPECULAR:
+        mMatSpecular = value;
+        break;
+      case MAT_SHINE:
+        mMatShine = value;
+        break;
+      }
+    }
+
+    //set fog
+    void SRInterface::setFog(FogFactor factor, double value)
+    {
+      switch (factor)
+      {
+      case FOG_INTENSITY:
+        mFogIntensity = value;
+        break;
+      case FOG_START:
+        mFogStart = value;
+        break;
+      case FOG_END:
+        mFogEnd = value;
+        break;
+      }
+    }
+
+    void SRInterface::setFogColor(const glm::vec4 &color)
+    {
+      mFogColor = color;
+    }
+
     const glm::mat4& SRInterface::getWorldToProjection() const
     { return mCamera->getWorldToProjection(); }
 
@@ -795,15 +845,15 @@ namespace SCIRun {
             GLenum primitive = GL_TRIANGLES;
             switch (ibo.prim)
             {
-            case SpireIBO::POINTS:
+            case SpireIBO::PRIMITIVE::POINTS:
               primitive = GL_POINTS;
               break;
 
-            case SpireIBO::LINES:
+            case SpireIBO::PRIMITIVE::LINES:
               primitive = GL_LINES;
               break;
 
-            case SpireIBO::TRIANGLES:
+            case SpireIBO::PRIMITIVE::TRIANGLES:
             default:
               primitive = GL_TRIANGLES;
               break;
@@ -814,7 +864,7 @@ namespace SCIRun {
               /// Create sorted lists of Buffers for transparency in each direction of the axis
               uint32_t* ibo_buffer = reinterpret_cast<uint32_t*>(ibo.data->getBuffer());
               size_t num_triangles = ibo.data->getBufferSize() / (sizeof(uint32_t) * 3);
-              Core::Geometry::Vector dir(0.0, 0.0, 0.0);
+              Vector dir(0.0, 0.0, 0.0);
 
               std::vector<DepthIndex> rel_depth(num_triangles);
               for (int i = 0; i <= 6; ++i)
@@ -829,32 +879,32 @@ namespace SCIRun {
                 }
                 if (i == 1)
                 {
-                  dir = Core::Geometry::Vector(1.0, 0.0, 0.0);
+                  dir = Vector(1.0, 0.0, 0.0);
                   name += "X";
                 }
                 if (i == 2)
                 {
-                  dir = Core::Geometry::Vector(0.0, 1.0, 0.0);
+                  dir = Vector(0.0, 1.0, 0.0);
                   name += "Y";
                 }
                 if (i == 3)
                 {
-                  dir = Core::Geometry::Vector(0.0, 0.0, 1.0);
+                  dir = Vector(0.0, 0.0, 1.0);
                   name += "Z";
                 }
                 if (i == 4)
                 {
-                  dir = Core::Geometry::Vector(-1.0, 0.0, 0.0);
+                  dir = Vector(-1.0, 0.0, 0.0);
                   name += "NegX";
                 }
                 if (i == 5)
                 {
-                  dir = Core::Geometry::Vector(0.0, -1.0, 0.0);
+                  dir = Vector(0.0, -1.0, 0.0);
                   name += "NegY";
                 }
                 if (i == 6)
                 {
-                  dir = Core::Geometry::Vector(0.0, 0.0, -1.0);
+                  dir = Vector(0.0, 0.0, -1.0);
                   name += "NegZ";
                 }
                 if (i > 0)
@@ -862,15 +912,15 @@ namespace SCIRun {
                   for (size_t j = 0; j < num_triangles; j++)
                   {
                     float* vertex1 = reinterpret_cast<float*>(vbo_buffer[nameIndex] + stride_vbo[nameIndex] * (ibo_buffer[j * 3]));
-                    Core::Geometry::Point node1(vertex1[0], vertex1[1], vertex1[2]);
+                    Point node1(vertex1[0], vertex1[1], vertex1[2]);
 
                     float* vertex2 = reinterpret_cast<float*>(vbo_buffer[nameIndex] + stride_vbo[nameIndex] * (ibo_buffer[j * 3 + 1]));
-                    Core::Geometry::Point node2(vertex2[0], vertex2[1], vertex2[2]);
+                    Point node2(vertex2[0], vertex2[1], vertex2[2]);
 
                     float* vertex3 = reinterpret_cast<float*>(vbo_buffer[nameIndex] + stride_vbo[nameIndex] * (ibo_buffer[j * 3 + 2]));
-                    Core::Geometry::Point node3(vertex3[0], vertex3[1], vertex3[2]);
+                    Point node3(vertex3[0], vertex3[1], vertex3[2]);
 
-                    rel_depth[j].mDepth = Core::Geometry::Dot(dir, node1) + Core::Geometry::Dot(dir, node2) + Core::Geometry::Dot(dir, node3);
+                    rel_depth[j].mDepth = Dot(dir, node1) + Dot(dir, node2) + Dot(dir, node3);
                     rel_depth[j].mIndex = j;
                   }
 
@@ -914,7 +964,7 @@ namespace SCIRun {
             {
               uint64_t entityID = getEntityIDForName(pass.passName, port);
 
-              if (pass.renderType == RENDER_VBO_IBO)
+              if (pass.renderType == RenderType::RENDER_VBO_IBO)
               {
                 addVBOToEntity(entityID, pass.vboName);
                 if (mRenderSortType == RenderState::TransparencySortType::LISTS_SORT)
@@ -967,12 +1017,12 @@ namespace SCIRun {
                 // and add them to our entity in question.
                 std::string assetName = "Assets/sphere.geom";
 
-                if (pass.renderType == RENDER_RLIST_SPHERE)
+                if (pass.renderType == RenderType::RENDER_RLIST_SPHERE)
                 {
                   assetName = "Assets/sphere.geom";
                 }
 
-                if (pass.renderType == RENDER_RLIST_CYLINDER)
+                if (pass.renderType == RenderType::RENDER_RLIST_CYLINDER)
                 {
                   assetName = "Assests/arrow.geom";
                 }
@@ -993,7 +1043,7 @@ namespace SCIRun {
                 widgetExists_ = true;
               }
 
-              if (pass.renderType == RENDER_RLIST_SPHERE)
+              if (pass.renderType == RenderType::RENDER_RLIST_SPHERE)
               {
                 double scale = pass.scalar;
                 trafo.transform[0].x = scale;
@@ -1023,11 +1073,22 @@ namespace SCIRun {
               ren::CommonUniforms commonUniforms;
               mCore.addComponent(entityID, commonUniforms);
 
-              for (const auto& uniform : pass.mUniforms)
+              for (auto& uniform : pass.mUniforms)
               {
+                applyMatFactors(uniform);
                 applyUniform(entityID, uniform);
               }
 
+              //if (mFogIntensity > 0.0)
+              {
+                Graphics::Datatypes::SpireSubPass::Uniform uniform;
+                uniform.name = "uFogSettings";
+                applyFog(uniform);
+                applyUniform(entityID, uniform);
+                uniform.name = "uFogColor";
+                applyFog(uniform);
+                applyUniform(entityID, uniform);
+              }
 
               // Add components associated with entity. We just need a base class which
               // we can pass in an entity ID, then a derived class which bundles
@@ -1084,7 +1145,7 @@ namespace SCIRun {
     }
 
     //------------------------------------------------------------------------------
-    void SRInterface::addTextToEntity(uint64_t entityID, const Graphics::Datatypes::SpireText& text)
+    void SRInterface::addTextToEntity(uint64_t entityID, const SpireText& text)
     {
       if (text.name == "")
         return;
@@ -1131,14 +1192,47 @@ namespace SCIRun {
     {
       switch (uniform.type)
       {
-      case SpireSubPass::Uniform::UNIFORM_SCALAR:
+      case SpireSubPass::Uniform::UniformType::UNIFORM_SCALAR:
         ren::addGLUniform(mCore, entityID, uniform.name.c_str(), static_cast<float>(uniform.data.x));
         break;
 
-      case SpireSubPass::Uniform::UNIFORM_VEC4:
+      case SpireSubPass::Uniform::UniformType::UNIFORM_VEC4:
         ren::addGLUniform(mCore, entityID, uniform.name.c_str(), uniform.data);
         break;
       }
+    }
+
+    //apply material factors
+    void SRInterface::applyMatFactors(Graphics::Datatypes::SpireSubPass::Uniform& uniform)
+    {
+      if (uniform.name == "uAmbientColor")
+        uniform.data = glm::vec4(mMatAmbient);
+      else if (uniform.name == "uSpecularColor")
+        uniform.data = glm::vec4(mMatSpecular);
+      else if (uniform.name == "uSpecularPower")
+        uniform.data = glm::vec4(mMatShine);
+    }
+
+    //apply fog
+    void SRInterface::applyFog(Graphics::Datatypes::SpireSubPass::Uniform& uniform)
+    {
+      if (uniform.name == "uFogSettings")
+      {
+        double start, end, zdist, ddist;
+        glm::vec4 center(mSceneBBox.center().x(), mSceneBBox.center().y(), mSceneBBox.center().z(), 1.0);
+        glm::mat4 worldToView = mCamera->getWorldToView();
+        center = worldToView * center;
+        center /= center.w;
+        glm::vec3 c3(center.x, center.y, center.z);
+        zdist = glm::length(c3);
+        ddist = 1.1 * mSceneBBox.diagonal().length();
+        start = zdist + (mFogStart - 0.5) * ddist;
+        end = zdist + (mFogEnd - 0.5) * ddist;
+        uniform.data = glm::vec4(mFogIntensity, start, end, 0.0);
+      }
+      else if (uniform.name == "uFogColor")
+        uniform.data = mFogColor;
+      uniform.type = Graphics::Datatypes::SpireSubPass::Uniform::UniformType::UNIFORM_VEC4;
     }
 
     //------------------------------------------------------------------------------

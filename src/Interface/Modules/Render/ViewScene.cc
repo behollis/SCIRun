@@ -366,6 +366,9 @@ void ViewSceneDialog::newGeometryValue()
     return;
   spire->removeAllGeomObjects();
 
+  int port = 0;
+  std::vector<std::string> objectNames;
+  std::vector<std::string> validObjects;
   // Grab the geomData transient value.
   auto geomDataTransient = state_->getTransientValue(Parameters::GeomData);
   if (geomDataTransient && !geomDataTransient->empty())
@@ -376,15 +379,12 @@ void ViewSceneDialog::newGeometryValue()
       LOG_DEBUG("Logical error: ViewSceneDialog received an empty list.");
       return;
     }
-    if (!spire)
-    {
-      LOG_DEBUG("Logical error: Spire lock not acquired.");
-      return;
-    }
+    //if (!spire)
+    //{
+    //  LOG_DEBUG("Logical error: Spire lock not acquired.");
+    //  return;
+    //}
 
-    int port = 0;
-    std::vector<std::string> objectNames;
-    std::vector<std::string> validObjects;
     for (auto it = geomData->begin(); it != geomData->end(); ++it, ++port)
     {
       auto obj = *it;
@@ -401,37 +401,43 @@ void ViewSceneDialog::newGeometryValue()
         }
       }
     }
-    //add objects of its own
-    //scale bar
-    ++port;
-    if (scaleBar_.visible && scaleBarGeom_)
-    {
-      auto name = scaleBarGeom_->uniqueID();
-      auto displayName = QString::fromStdString(name).split('_').at(1);
-      objectNames.push_back(name/*displayName.toStdString()*/);
+  }
+
+  //add objects of its own
+  //scale bar
+  ++port;
+  if (scaleBar_.visible && scaleBarGeom_)
+  {
+    auto name = scaleBarGeom_->uniqueID();
+    auto displayName = QString::fromStdString(name).split('_').at(1);
+    objectNames.push_back(name/*displayName.toStdString()*/);
       auto realObj = boost::dynamic_pointer_cast<GeometryObjectSpire>(scaleBarGeom_);
-      if (realObj)
-      {
-        spire->handleGeomObject(realObj, port);
-        validObjects.push_back(name);
-      }
-    }
-    ++port;
-    //clippingplanes
-    for (auto i : clippingPlaneGeoms_)
+    if (realObj)
     {
-      auto name = i->uniqueID();
-      auto displayName = QString::fromStdString(name).split('_').at(1);
-      objectNames.push_back(name/*displayName.toStdString()*/);
-      auto realObj = boost::dynamic_pointer_cast<GeometryObjectSpire>(i);
-      if (realObj)
-      {
-        spire->handleGeomObject(realObj, port);
-        validObjects.push_back(name);
-      }
+      spire->handleGeomObject(realObj, port);
+      validObjects.push_back(name);
     }
+  }
+  ++port;
+  //clippingplanes
+  for (auto i : clippingPlaneGeoms_)
+  {
+    auto name = i->uniqueID();
+    auto displayName = QString::fromStdString(name).split('_').at(1);
+    objectNames.push_back(name/*displayName.toStdString()*/);
+      auto realObj = boost::dynamic_pointer_cast<GeometryObjectSpire>(i);
+    if (realObj)
+    {
+      spire->handleGeomObject(realObj, port);
+      validObjects.push_back(name);
+    }
+  }
+
+  if (!validObjects.empty())
     spire->gcInvalidObjects(validObjects);
 
+  if (!objectNames.empty())
+  {
     sort(objectNames.begin(), objectNames.end());
     if (previousObjectNames_ != objectNames)
     {
@@ -455,13 +461,14 @@ void ViewSceneDialog::newGeometryValue()
       }
       itemValueChanged_ = false;
     }
+
   }
-  else
-  {
-    if (!spire)
-      return;
-    spire->removeAllGeomObjects();
-  }
+  //else
+  //{
+  //  if (!spire)
+  //    return;
+  //  spire->removeAllGeomObjects();
+  //}
 
 #ifdef BUILD_TESTING
   sendScreenshotDownstreamForTesting();
@@ -756,6 +763,12 @@ void ViewSceneDialog::assignBackgroundColor()
     state_->setValue(Modules::Render::ViewScene::BackgroundColor, ColorRGB(bgColor_.red(), bgColor_.green(), bgColor_.blue()).toString());
     std::shared_ptr<SRInterface> spire = mSpire.lock();
     spire->setBackgroundColor(bgColor_);
+    bool useBg = state_->getValue(Modules::Render::ViewScene::UseBGColor).toBool();
+    if (useBg)
+      setFogColor(glm::vec4(bgColor_.red(), bgColor_.green(), bgColor_.blue(), 1.0));
+    else
+      setFogColor(glm::vec4(fogColor_.red(), fogColor_.green(), fogColor_.blue(), 1.0));
+    newGeometryValue();
   }
 }
 
@@ -928,21 +941,29 @@ void ViewSceneDialog::updatClippingPlaneDisplay()
 void ViewSceneDialog::setAmbientValue(double value)
 {
   state_->setValue(Modules::Render::ViewScene::Ambient, value);
+  setMaterialFactor(SRInterface::MAT_AMBIENT, value);
+  newGeometryValue();
 }
 
 void ViewSceneDialog::setDiffuseValue(double value)
 {
   state_->setValue(Modules::Render::ViewScene::Diffuse, value);
+  setMaterialFactor(SRInterface::MAT_DIFFUSE, value);
+  newGeometryValue();
 }
 
 void ViewSceneDialog::setSpecularValue(double value)
 {
   state_->setValue(Modules::Render::ViewScene::Specular, value);
+  setMaterialFactor(SRInterface::MAT_SPECULAR, value);
+  newGeometryValue();
 }
 
 void ViewSceneDialog::setShininessValue(double value)
 {
   state_->setValue(Modules::Render::ViewScene::Shine, value);
+  setMaterialFactor(SRInterface::MAT_SHINE, value);
+  newGeometryValue();
 }
 
 void ViewSceneDialog::setEmissionValue(double value)
@@ -953,6 +974,11 @@ void ViewSceneDialog::setEmissionValue(double value)
 void ViewSceneDialog::setFogOn(bool value)
 {
   state_->setValue(Modules::Render::ViewScene::FogOn, value);
+  if (value)
+    setFog(SRInterface::FOG_INTENSITY, 1.0);
+  else
+    setFog(SRInterface::FOG_INTENSITY, 0.0);
+  newGeometryValue();
 }
 
 void ViewSceneDialog::setFogOnVisibleObjects(bool value)
@@ -963,16 +989,25 @@ void ViewSceneDialog::setFogOnVisibleObjects(bool value)
 void ViewSceneDialog::setFogUseBGColor(bool value)
 {
   state_->setValue(Modules::Render::ViewScene::UseBGColor, value);
+  if (value)
+    setFogColor(glm::vec4(bgColor_.red(), bgColor_.green(), bgColor_.blue(), 1.0));
+  else
+    setFogColor(glm::vec4(fogColor_.red(), fogColor_.green(), fogColor_.blue(), 1.0));
+  newGeometryValue();
 }
 
 void ViewSceneDialog::setFogStartValue(double value)
 {
   state_->setValue(Modules::Render::ViewScene::FogStart, value);
+  setFog(SRInterface::FOG_START, value);
+  newGeometryValue();
 }
 
 void ViewSceneDialog::setFogEndValue(double value)
 {
   state_->setValue(Modules::Render::ViewScene::FogEnd, value);
+  setFog(SRInterface::FOG_END, value);
+  newGeometryValue();
 }
 
 void ViewSceneDialog::assignFogColor()
@@ -984,6 +1019,12 @@ void ViewSceneDialog::assignFogColor()
     fogColor_ = newColor;
     mConfigurationDock->setFogColorLabel(fogColor_);
     state_->setValue(Modules::Render::ViewScene::FogColor, ColorRGB(fogColor_.red(), fogColor_.green(), fogColor_.blue()).toString());
+  }
+  bool useBg = state_->getValue(Modules::Render::ViewScene::UseBGColor).toBool();
+  if (!useBg)
+  {
+    setFogColor(glm::vec4(fogColor_.red(), fogColor_.green(), fogColor_.blue(), 1.0));
+    newGeometryValue();
   }
 }
 
@@ -1074,7 +1115,7 @@ GeometryHandle ViewSceneDialog::buildGeometryScaleBar()
   //text
   std::stringstream ss;
   std::string oneline;
-  ss << scaleBar_.length << " " << scaleBar_.unit;
+  ss << scaleBar_.length * scaleBar_.multiplier << " " << scaleBar_.unit;
   oneline = ss.str();
   double text_len = 0.0;
   if (textBuilder_.isInit() && textBuilder_.isValid())
@@ -1144,7 +1185,7 @@ GeometryHandle ViewSceneDialog::buildGeometryScaleBar()
 
   // Construct IBO.
 
-  SpireIBO geomIBO(iboName, SpireIBO::LINES, sizeof(uint32_t), iboBufferSPtr);
+  SpireIBO geomIBO(iboName, SpireIBO::PRIMITIVE::LINES, sizeof(uint32_t), iboBufferSPtr);
 
   RenderState renState;
   renState.set(RenderState::IS_ON, true);
@@ -1156,7 +1197,7 @@ GeometryHandle ViewSceneDialog::buildGeometryScaleBar()
   SpireText text;
 
   SpireSubPass pass(passName, vboName, iboName, shader,
-    COLOR_MAP, renState, RENDER_VBO_IBO,
+                    ColorScheme::COLOR_MAP, renState, RenderType::RENDER_VBO_IBO,
     geomVBO, geomIBO, text);
 
   // Add all uniforms generated above to the pass.
@@ -1268,7 +1309,7 @@ void ViewSceneDialog::buildGeometryClippingPlane(int index, glm::vec4 plane, con
     p3.x() << p3.y() << p3.z() <<
     p4.x() << p4.y() << p4.z();
   uniqueNodeID = ss.str();
-  ColorScheme colorScheme(COLOR_UNIFORM);
+  ColorScheme colorScheme(ColorScheme::COLOR_UNIFORM);
   RenderState renState;
   renState.set(RenderState::IS_ON, true);
   renState.set(RenderState::USE_TRANSPARENCY, false);
@@ -1278,8 +1319,7 @@ void ViewSceneDialog::buildGeometryClippingPlane(int index, glm::vec4 plane, con
   renState.set(RenderState::IS_WIDGET, true);
   GeometryHandle geom(new GeometryObjectSpire(*gid_, uniqueNodeID, false));
   glyphs.buildObject(geom, uniqueNodeID, renState.get(RenderState::USE_TRANSPARENCY), 1.0,
-    colorScheme, renState, SpireIBO::TRIANGLES, bbox);
-  //handleGeomObject(geom, 0);
+    colorScheme, renState, SpireIBO::PRIMITIVE::TRIANGLES, bbox);
 
   Graphics::GlyphGeom glyphs2;
   glyphs2.addPlane(p1, p2, p3, p4, ColorRGB());
@@ -1294,10 +1334,33 @@ void ViewSceneDialog::buildGeometryClippingPlane(int index, glm::vec4 plane, con
   renState.defaultColor = ColorRGB(1, 1, 1, 0.2);
   GeometryHandle geom2(new GeometryObjectSpire(*gid_, ss.str(), false));
   glyphs2.buildObject(geom2, uniqueNodeID, renState.get(RenderState::USE_TRANSPARENCY), 0.2,
-    colorScheme, renState, SpireIBO::TRIANGLES, bbox);
+    colorScheme, renState, SpireIBO::PRIMITIVE::TRIANGLES, bbox);
 
   clippingPlaneGeoms_.push_back(geom);
   clippingPlaneGeoms_.push_back(geom2);
+}
+
+//set material
+void ViewSceneDialog::setMaterialFactor(int factor, double value)
+{
+  auto spire = mSpire.lock();
+  if (spire)
+    spire->setMaterialFactor(static_cast<SRInterface::MatFactor>(factor), value);
+}
+
+//set fog
+void ViewSceneDialog::setFog(int factor, double value)
+{
+  auto spire = mSpire.lock();
+  if (spire)
+    spire->setFog(static_cast<SRInterface::FogFactor>(factor), value);
+}
+
+void ViewSceneDialog::setFogColor(const glm::vec4 &color)
+{
+  auto spire = mSpire.lock();
+  if (spire)
+    spire->setFogColor(color/255.0);
 }
 
 //------------------------------------------------------------------------------
@@ -1618,53 +1681,21 @@ namespace //TODO: move to appropriate location
 {
   Transform toSciTransform(const glm::mat4& mat)
   {
+    //needs transposing
     Transform t;
     for (int i = 0; i < 4; ++i)
       for (int j = 0; j < 4; ++j)
-        t.set_mat_val(i, j, mat[i][j]);
+        t.set_mat_val(i, j, mat[j][i]);
     return t;
   }
 }
 
 void ViewSceneDialog::sendGeometryFeedbackToState(int x, int y)
 {
-  //qDebug() << "sendGeometryFeedbackToState" << x << y;
-  Variable::List geomInfo;
-  //geomInfo.push_back(makeVariable("xClick", x));
-  //geomInfo.push_back(makeVariable("yClick", y));
-  geomInfo.push_back(makeVariable("counter", counter_));
-  counter_ = counter_ < 0 ? 1 : counter_ + 1;
   std::shared_ptr<SRInterface> spire = mSpire.lock();
-  //DenseMatrixHandle matrixHandle(new DenseMatrix(4, 4));
   glm::mat4 trans = spire->getWidgetTransform().transform;
 
-  geomInfo.push_back(makeVariable("x00", trans[0][0]));
-  geomInfo.push_back(makeVariable("x10", trans[1][0]));
-  geomInfo.push_back(makeVariable("x20", trans[2][0]));
-  geomInfo.push_back(makeVariable("x30", trans[3][0]));
-  geomInfo.push_back(makeVariable("x01", trans[0][1]));
-  geomInfo.push_back(makeVariable("x11", trans[1][1]));
-  geomInfo.push_back(makeVariable("x21", trans[2][1]));
-  geomInfo.push_back(makeVariable("x31", trans[3][1]));
-  geomInfo.push_back(makeVariable("x02", trans[0][2]));
-  geomInfo.push_back(makeVariable("x12", trans[1][2]));
-  geomInfo.push_back(makeVariable("x22", trans[2][2]));
-  geomInfo.push_back(makeVariable("x32", trans[3][2]));
-  geomInfo.push_back(makeVariable("x03", trans[0][3]));
-  geomInfo.push_back(makeVariable("x13", trans[1][3]));
-  geomInfo.push_back(makeVariable("x23", trans[2][3]));
-  geomInfo.push_back(makeVariable("x33", trans[3][3]));
-  /*
-  (*matrixHandle) << trans[0][0], trans[1][0], trans[2][0], trans[3][0]
-                   , trans[0][1], trans[1][1], trans[2][1], trans[3][1]
-                   , trans[0][2], trans[1][2], trans[2][2], trans[3][2]
-                   , trans[0][3], trans[1][3], trans[2][3], trans[3][3];
-  std::cout << "in view scene: " << (*matrixHandle) << std::endl;*/
-  //geomInfo.push_back(Variable(Name("transform"), matrixHandle, Variable::DATATYPE_VARIABLE));
-  auto var = makeVariable("geomInfo", geomInfo);
-  
   ViewSceneFeedback vsf;
-  vsf.info = var;
   vsf.transform = toSciTransform(trans);
   state_->setTransientValue(Parameters::GeometryFeedbackInfo, vsf);
 }

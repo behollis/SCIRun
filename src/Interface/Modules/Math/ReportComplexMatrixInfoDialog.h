@@ -6,7 +6,7 @@
    Copyright (c) 2015 Scientific Computing and Imaging Institute,
    University of Utah.
 
-   
+   License for the specific language governing rights and limitations under
    Permission is hereby granted, free of charge, to any person obtaining a
    copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation
@@ -26,14 +26,30 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#undef SCISHARE
+#ifndef INTERFACE_MODULES_REPORT_COMPLEX_MATRIX_INFO_H
+#define INTERFACE_MODULES_REPORT_COMPLEX_MATRIX_INFO_H
 
-#if defined(_WIN32) && !defined(BUILD_SCIRUN_STATIC)
-#ifdef BUILD_Modules_Legacy_MatlabInterface
-#define SCISHARE __declspec(dllexport)
-#else
-#define SCISHARE __declspec(dllimport)
-#endif
-#else
-#define SCISHARE
+#include "Interface/Modules/Math/ui_ReportComplexMatrixInfo.h"
+#include <Interface/Modules/Base/ModuleDialogGeneric.h>
+#include <Interface/Modules/Math/share.h>
+
+namespace SCIRun {
+namespace Gui {
+
+class SCISHARE ReportComplexMatrixInfoDialog : public ModuleDialogGeneric,
+  public Ui::ReportComplexMatrixInfo
+{
+	Q_OBJECT
+
+public:
+  ReportComplexMatrixInfoDialog(const std::string& name,
+    SCIRun::Dataflow::Networks::ModuleStateHandle state,
+    QWidget* parent = nullptr);
+  virtual void moduleExecuted() override { pullAndDisplayInfo(); }
+private Q_SLOTS:
+  void pullAndDisplayInfo();
+};
+}
+}
+
 #endif

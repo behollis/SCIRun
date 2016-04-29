@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!--
+/*
    For more information, please see: http://software.sci.utah.edu
 
    The MIT License
 
-   Copyright (c) 2009 Scientific Computing and Imaging Institute,
+   Copyright (c) 2015 Scientific Computing and Imaging Institute,
    University of Utah.
 
-   
+   License for the specific language governing rights and limitations under
    Permission is hereby granted, free of charge, to any person obtaining a
    copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation
@@ -25,10 +24,37 @@
    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
    DEALINGS IN THE SOFTWARE.
--->
+   */
 
-<service name="matlabenginefiletransfer" class="FileTransfer" classpackage="SCIRun" version="1.0">
-<rcfile>matlabengine.rc</rcfile>
-<buffersize>30000</buffersize>
-</service>
+#ifndef INTERFACE_MODULES_MATLAB_ImportFieldsFromMatlabDialog_H
+#define INTERFACE_MODULES_MATLAB_ImportFieldsFromMatlabDialog_H
 
+#include "Interface/Modules/Matlab/ui_ImportFieldsFromMatlab.h"
+#include <Interface/Modules/Base/ModuleDialogGeneric.h>
+#include <Interface/Modules/Base/RemembersFileDialogDirectory.h>
+#include <Interface/Modules/Matlab/share.h>
+
+namespace SCIRun {
+  namespace Gui {
+
+    class SCISHARE ImportFieldsFromMatlabDialog : public ModuleDialogGeneric,
+      public Ui::ImportFieldsFromMatlab, public RemembersFileDialogDirectory
+    {
+      Q_OBJECT
+
+    public:
+      ImportFieldsFromMatlabDialog(const std::string& name,
+        Dataflow::Networks::ModuleStateHandle state,
+        QWidget* parent = nullptr);
+    protected:
+      virtual void pullSpecial() override;
+    private Q_SLOTS:
+      void openFile();
+      void pushFileNameToState();
+      void pushPortChoices();
+    };
+
+  }
+}
+
+#endif

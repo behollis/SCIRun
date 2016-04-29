@@ -139,7 +139,7 @@ bool ShowSplashScreenGui::execute()
 
 void ShowSplashScreenGui::initSplashScreen()
 {
-  splash_ = new QSplashScreen(0, QPixmap(":/general/Resources/scirun_5_0_alpha.png"), Qt::WindowStaysOnTopHint);
+  splash_ = new QSplashScreen(nullptr, QPixmap(":/general/Resources/scirun_5_0_alpha.png"), Qt::WindowStaysOnTopHint);
   splashTimer_ = new QTimer;
   splashTimer_->setSingleShot( true );
   splashTimer_->setInterval( 5000 );
@@ -169,6 +169,16 @@ QPointF SCIRun::Gui::findCenterOfNetwork(const ModulePositions& positions)
 {
   auto pointRange = positions.modulePositions | boost::adaptors::map_values;
   return centroidOfPointRange(pointRange.begin(), pointRange.end());
+}
+
+const char* SCIRun::Gui::addNewModuleActionTypePropertyName()
+{
+  return "connectNewModuleSource";
+}
+
+const char* SCIRun::Gui::insertNewModuleActionTypePropertyName()
+{
+  return "inputPortToConnectPid";
 }
 
 namespace std

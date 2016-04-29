@@ -3,10 +3,10 @@
 
    The MIT License
 
-   Copyright (c) 2009 Scientific Computing and Imaging Institute,
+   Copyright (c) 2015 Scientific Computing and Imaging Institute,
    University of Utah.
 
-   
+   License for the specific language governing rights and limitations under
    Permission is hereby granted, free of charge, to any person obtaining a
    copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation
@@ -26,22 +26,30 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MATLABINTERFACE_SERVICES_MATLABENGINE_H
-#define MATLABINTERFACE_SERVICES_MATLABENGINE_H 1
+#ifndef ALGORITHMS_MATH_REPORTCOMPLEXMATRIXINFO_H
+#define ALGORITHMS_MATH_REPORTCOMPLEXMATRIXINFO_H
 
+#include <Core/Algorithms/Base/AlgorithmBase.h>
+#include <Core/Algorithms/Math/share.h>
 
 namespace SCIRun {
+namespace Core {
+namespace Algorithms {
+namespace Math {
+  
+  class SCISHARE ReportComplexMatrixInfoAlgo : public AlgorithmBase
+  {
+  public:
+    typedef Datatypes::ComplexDenseMatrixHandle Inputs;
+    typedef boost::tuple<std::string, size_t, size_t, size_t, complex, complex> Outputs;
 
+    Outputs runImpl(const Inputs& input) const;
 
-enum {
-		TAG_MERROR  = 1000,		// MATLAB ENGINE ERROR
-		TAG_MSUCCESS,         // MATLAB ENGINE WAS SUCCESSFULLY STARTED
-		TAG_MCODE,            // FORWARD NAME OF M-FILE
-		TAG_MCODE_ERROR,      // MCODE FAILED
-		TAG_MCODE_SUCCESS,		// MCODE WAS EXECUTED SUCCESSFULLY
-    TAG_INPUT             // FORWARD STRING INPUT
-	};
+    virtual AlgorithmOutput run(const AlgorithmInput& input) const override;
 
-} // end namespace
+    static std::string summarize(const Outputs& info);
+  };
+
+}}}}
 
 #endif

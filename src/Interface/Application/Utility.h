@@ -75,7 +75,13 @@ namespace Gui
   typedef boost::function<bool(const Dataflow::Networks::ModuleDescription&)> ModulePredicate;
   typedef boost::function<void(QAction*)> QActionHookup;
   QList<QAction*> fillMenuWithFilteredModuleActions(QMenu* menu, const Dataflow::Networks::ModuleDescriptionMap& moduleMap, ModulePredicate modulePred, QActionHookup hookup, QWidget* parent);
+  bool portTypeMatches(const std::string& portTypeToMatch, bool isInput, const Dataflow::Networks::ModuleDescription& module);
   QPointF findCenterOfNetwork(const Dataflow::Networks::ModulePositions& positions);
+
+  const char* addNewModuleActionTypePropertyName();
+  const char* insertNewModuleActionTypePropertyName();
+
+  const Qt::GlobalColor CLIPBOARD_COLOR = Qt::cyan;
 }
 
 }

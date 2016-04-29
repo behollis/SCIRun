@@ -105,7 +105,14 @@ using namespace SCIRun::Core::Algorithms;
       }
     }
     else if (params->pythonScriptFile())
+    {
+      if (params->executeNetworkAndQuit())
+        q->enqueue(cmdFactory_->create(GlobalCommands::SetupQuitAfterExecute));
       q->enqueue(cmdFactory_->create(GlobalCommands::RunPythonScript));
+    }
+
+    if (params->interactiveMode())
+      q->enqueue(cmdFactory_->create(GlobalCommands::InteractiveMode));
 
     return q;
   }
