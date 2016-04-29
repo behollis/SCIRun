@@ -100,7 +100,7 @@ namespace Gui {
     void executionLoopStarted();
     void executionLoopHalted();
   protected:
-    explicit ModuleDialogGeneric(SCIRun::Dataflow::Networks::ModuleStateHandle state, QWidget* parent = 0);
+    explicit ModuleDialogGeneric(SCIRun::Dataflow::Networks::ModuleStateHandle state, QWidget* parent = nullptr);
     virtual void contextMenuEvent(QContextMenuEvent* e) override;
     void fixSize();
     void connectButtonToExecuteSignal(QAbstractButton* button);
@@ -137,9 +137,12 @@ namespace Gui {
     void addSliderManager(QSlider* slider, const Core::Algorithms::AlgorithmParameterName& stateKey);
     void removeManager(const Core::Algorithms::AlgorithmParameterName& stateKey);
 
-    typedef std::vector<std::function<QTableWidgetItem*()>> TableItemMakerList;
+    using TableWidgetMaker = std::function<QTableWidgetItem*()>;
+    using WidgetMaker = std::function<QWidget*()>;
+    typedef std::map<int, TableWidgetMaker> TableItemMakerMap;
+    typedef std::map<int, WidgetMaker> WidgetItemMakerMap;
     void syncTableRowsWithDynamicPort(const std::string& portId, const std::string& type,
-      QTableWidget* table, int lineEditIndex, DynamicPortChange portChangeType, const TableItemMakerList& tableItemMakers);
+      QTableWidget* table, int lineEditIndex, DynamicPortChange portChangeType, const TableItemMakerMap& tableItems, const WidgetItemMakerMap& widgetItems = WidgetItemMakerMap());
     static std::tuple<std::string, int> getConnectedDynamicPortId(const std::string& portId, const std::string& type, bool isLoadingFile);
 
     void createExecuteInteractivelyToggleAction();
@@ -177,8 +180,9 @@ namespace Gui {
 
   SCISHARE void openUrl(const QString& url, const std::string& name);
   SCISHARE void openPythonAPIDoc();
+}
+}
 
-}
-}
+inline QDebug& operator<<(QDebug& qdebug, const std::string& str) { return qdebug << QString::fromStdString(str); }
 
 #endif

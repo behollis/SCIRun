@@ -58,7 +58,7 @@ class ShortcutsInterface;
 class TagManagerWindow;
 class PythonConsoleWidget;
 class FileDownloader;
-class ScriptedEventsWindow;
+class TriggeredEventsWindow;
 
 class SCIRunMainWindow : public QMainWindow, public Ui::SCIRunMainWindow
 {
@@ -116,10 +116,11 @@ private:
   QActionGroup* filterActionGroup_;
   QAction* actionEnterWhatsThisMode_;
   QStringList favoriteModuleNames_;
+  QMap<QString, QVariant> savedSubnetworks_;
   QToolButton* executeButton_;
   QByteArray windowState_;
   QPushButton* versionButton_;
-  ScriptedEventsWindow* scriptedEventsWindow_;
+  TriggeredEventsWindow* triggeredEventsWindow_;
   void postConstructionSignalHookup();
   void executeCommandLineRequests();
   void setTipsAndWhatsThis();
@@ -207,7 +208,10 @@ private Q_SLOTS:
   void networkTimedOut();
   void loadPythonAPIDoc();
   void showSnippetHelp();
+  void showClipboardHelp();
   void copyVersionToClipboard();
+  void updateClipboardHistory(const QString& xml);
+  void updateSavedSubnetworks();
   void changeExecuteActionIconToStop();
   void changeExecuteActionIconToPlay();
   void adjustExecuteButtonAppearance();

@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Modules/Factory/ModuleDescriptionLookup.h>
 #include <Modules/Basic/ReceiveScalar.h>
 #include <Modules/Basic/SendScalar.h>
+#include <Modules/Basic/ReceiveComplexScalar.h>
+#include <Modules/Basic/SendComplexScalar.h>
 #include <Modules/Basic/ReceiveTestMatrix.h>
 #include <Modules/Basic/SendTestMatrix.h>
 #include <Modules/Basic/DynamicPortTester.h>
@@ -99,7 +101,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Modules/Legacy/FiniteElements/BuildFEMatrix.h>
 #include <Modules/Basic/AsyncPortTestModule.h>
 #include <Modules/Basic/NeedToExecuteTester.h>
-#include <Modules/Legacy/Matlab/Interface/InterfaceWithMatlab.h>
 #include <Modules/Legacy/Converters/ConvertMatrixToString.h>
 #include <Modules/Basic/PortFeedbackTestModules.h>
 
@@ -117,7 +118,6 @@ using namespace SCIRun::Modules::Matlab::DataIO;
 using namespace SCIRun::Modules::StringProcessing;
 using namespace SCIRun::Modules::Visualization;
 using namespace SCIRun::Modules::Render;
-using namespace SCIRun::Modules::Matlab::Interface;
 using namespace SCIRun::Modules::Converters;
 
 void ModuleDescriptionLookup::addEssentialModules()
@@ -196,6 +196,8 @@ void ModuleDescriptionLookup::addTestingModules()
 {
   addModuleDesc<SendScalarModule>("SendScalar", "Testing", "SCIRun", "Functional, needs GUI and algorithm work.", "...");
   addModuleDesc<ReceiveScalarModule>("ReceiveScalar", "Testing", "SCIRun", "...", "...");
+  addModuleDesc<SendComplexScalarModule>("SendComplexMatrix", "Testing", "SCIRun", "...", "...");
+  addModuleDesc<ReceiveComplexScalarModule>("ReceiveComplexMatrix", "Testing", "SCIRun", "...", "...");
   addModuleDesc<SendTestMatrixModule>("SendTestMatrix", "Testing", "SCIRun", "...", "...");
   addModuleDesc<ReceiveTestMatrixModule>("ReceiveTestMatrix", "Testing", "SCIRun", "...", "...");
   addModuleDesc<DynamicPortTester>("DynamicPortTester", "Testing", "SCIRun", "...", "...");
