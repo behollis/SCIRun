@@ -35,7 +35,7 @@ install:
 # hopefully make OS X builds a bit faster
 script:
   - cd bin
-  - cmake -DDOWNLOAD_TOOLKITS:BOOL=OFF -DBUILD_TESTING:BOOL=OFF ../Superbuild
+  - cmake -DDOWNLOAD_TOOLKITS:BOOL=OFF -DBUILD_TESTING:BOOL=OFF -DBUILD_WITH_PYTHON:BOOL=OFF ../Superbuild
   - make -j8
 #  make SCIRunTestData_external
 #  && make test
