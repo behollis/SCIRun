@@ -25,7 +25,7 @@
 #  DEALINGS IN THE SOFTWARE.
 
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
-SET(teem_GIT_TAG "origin/master")
+SET(teem_GIT_TAG "origin/travis_test")
 SET(teem_DEPENDENCIES "Zlib_external;LibPNG_external")
 
 # If CMake ever allows overriding the checkout command or adding flags,
