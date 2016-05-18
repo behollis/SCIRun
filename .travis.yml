@@ -8,9 +8,9 @@ os:
 - linux
 
 compiler:
-- clang
+#- clang
 # TODO: gcc chokes on a boost pthread usage, disabling for now.
-#- gcc
+- g++
 
 #matrix:
 #  exclude:
