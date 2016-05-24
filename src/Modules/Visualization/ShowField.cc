@@ -1391,14 +1391,34 @@ void GeometryBuilder::renderEdges(
     //accumulate VBO or IBO data
     if (state.get(RenderState::USE_CYLINDER) && p0 != p1)
     {
+/*
       glyphs.addCylinder(p0, p1, radius, num_strips, edge_colors[0], edge_colors[1]);
       glyphs.addSphere(p0, radius, num_strips, edge_colors[0]);
       glyphs.addSphere(p1, radius, num_strips, edge_colors[1]);
+*/
+
+      Point p2( p0[0]+0.00001, p0[1], p0[2]);
+      Point p3( p1[0]+0.00001, p1[1], p1[2]);
+/*
+      p2[0] = p0[0] + 0.0001;
+      p2[1] = p0[1];
+      p2[2] = p0[2];
+      p3[0] = p1[0] + 0.0001;
+      p3[1] = p1[1];
+      p3[2] = p1[2];
+*/
+      glyphs.addPlane(p0, p1, p2, p3, edge_colors[0]);
     }
     else if (state.get(RenderState::USE_FAKED_VOLUMETRIC_EDGES) && p0 != p1)
     {
-      // for now default to line rendering...
-      glyphs.addLine(p0, p1, edge_colors[0], edge_colors[1]);
+      Point p2, p3;
+      p2[0] = p0[0];
+      p2[1] = p0[1];
+      p2[2] = p0[2];
+      p3[0] = p1[0];
+      p3[1] = p1[1];
+      p3[2] = p1[2];
+      glyphs.addPlane(p0, p1, p2, p3, edge_colors[0]);
     }
     else
     {

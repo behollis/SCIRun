@@ -64,7 +64,7 @@ public:
     // Edge flags
     USE_CYLINDER,
     USE_TRANSPARENT_EDGES,
-	USE_FAKED_VOLUMETRIC_EDGES,
+    USE_FAKED_VOLUMETRIC_EDGES,
 
     // Face flags
     USE_NORMALS,
