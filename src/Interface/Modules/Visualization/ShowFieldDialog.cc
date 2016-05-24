@@ -74,13 +74,13 @@ ShowFieldDialog::ShowFieldDialog(const std::string& name, ModuleStateHandle stat
   addSpinBoxManager(sphereResolutionSpinBox, ShowFieldModule::SphereResolution);
   addSpinBoxManager(textSizeSpinBox_, ShowFieldModule::TextSize);
   addSpinBoxManager(textPrecisionSpinBox_, ShowFieldModule::TextPrecision);
-  addRadioButtonGroupManager({ edgesAsLinesButton_, edgesAsCylindersButton_ }, ShowFieldModule::EdgesAsCylinders);
+  addRadioButtonGroupManager({ edgesAsLinesButton_, edgesAsCylindersButton_, edgesAsFakedVolumetricLinesButton_ }, ShowFieldModule::EdgesAsCylinders);
   addRadioButtonGroupManager({ nodesAsPointsButton_, nodesAsSpheresButton_ }, ShowFieldModule::NodeAsSpheres);
   addRadioButtonGroupManager({ textColoringRadioButton_, colormapLookupTextRadioButton_, conversionRGBTextRadioButton_ }, ShowFieldModule::TextColoring);
 
   connectButtonsToExecuteSignal({ showNodesCheckBox_, showEdgesCheckBox_, showFacesCheckBox_, enableTransparencyNodesCheckBox_,
     enableTransparencyEdgesCheckBox_, enableTransparencyFacesCheckBox_, invertNormalsCheckBox, edgesAsLinesButton_,
-    edgesAsCylindersButton_, nodesAsPointsButton_, nodesAsSpheresButton_ });
+	edgesAsCylindersButton_, edgesAsFakedVolumetricLinesButton_, nodesAsPointsButton_, nodesAsSpheresButton_ });
 
   connectButtonToExecuteSignal(useFaceNormalsCheckBox_);
 

@@ -254,6 +254,7 @@ RenderState GeometryBuilder::getEdgeRenderState(
   renState.set(RenderState::IS_ON, state->getValue(ShowFieldModule::ShowEdges).toBool());
   renState.set(RenderState::USE_TRANSPARENT_EDGES, state->getValue(ShowFieldModule::EdgeTransparency).toBool());
   renState.set(RenderState::USE_CYLINDER, state->getValue(ShowFieldModule::EdgesAsCylinders).toInt() == 1);
+  renState.set(RenderState::USE_FAKED_VOLUMETRIC_EDGES, state->getValue(ShowFieldModule::EdgesAsFakedVolumetricLines).toInt() == 1);
 
   renState.defaultColor = ColorRGB(state->getValue(ShowFieldModule::DefaultMeshColor).toString());
   renState.defaultColor = (renState.defaultColor.r() > 1.0 ||
@@ -1320,6 +1321,8 @@ void GeometryBuilder::renderEdges(
   // Use cylinders...
   if (state.get(RenderState::USE_CYLINDER))
     primIn = SpireIBO::PRIMITIVE::TRIANGLES;
+  else if (state.get(RenderState::USE_FAKED_VOLUMETRIC_EDGES))
+    primIn = SpireIBO::PRIMITIVE::QUADS;
 
   GlyphGeom glyphs;
   while (eiter != eiter_end)
@@ -1392,6 +1395,11 @@ void GeometryBuilder::renderEdges(
       glyphs.addSphere(p0, radius, num_strips, edge_colors[0]);
       glyphs.addSphere(p1, radius, num_strips, edge_colors[1]);
     }
+    else if (state.get(RenderState::USE_FAKED_VOLUMETRIC_EDGES) && p0 != p1)
+    {
+      // for now default to line rendering...
+      glyphs.addLine(p0, p1, edge_colors[0], edge_colors[1]);
+    }
     else
     {
       glyphs.addLine(p0, p1, edge_colors[0], edge_colors[1]);
@@ -1450,6 +1458,7 @@ const AlgorithmParameterName ShowFieldModule::FaceInvertNormals("FaceInvertNorma
 const AlgorithmParameterName ShowFieldModule::NodeAsPoints("NodeAsPoints");
 const AlgorithmParameterName ShowFieldModule::NodeAsSpheres("NodeAsSpheres");
 const AlgorithmParameterName ShowFieldModule::EdgesAsLines("EdgesAsLines");
+const AlgorithmParameterName ShowFieldModule::EdgesAsFakedVolumetricLines("EdgesAsFakedVolumetricLines");
 const AlgorithmParameterName ShowFieldModule::EdgesAsCylinders("EdgesAsCylinders");
 const AlgorithmParameterName ShowFieldModule::DefaultMeshColor("DefaultMeshColor");
 const AlgorithmParameterName ShowFieldModule::FaceTransparencyValue("FaceTransparencyValue");

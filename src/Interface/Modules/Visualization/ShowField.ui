@@ -362,6 +362,16 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QRadioButton" name="edgesAsFakedVolumetricLinesButton_">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Volumetric Lines</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>

@@ -78,6 +78,7 @@ namespace SCIRun {
         static const Core::Algorithms::AlgorithmParameterName NodeAsPoints;
         static const Core::Algorithms::AlgorithmParameterName NodeAsSpheres;
         static const Core::Algorithms::AlgorithmParameterName EdgesAsLines;
+        static const Core::Algorithms::AlgorithmParameterName EdgesAsFakedVolumetricLines;
         static const Core::Algorithms::AlgorithmParameterName EdgesAsCylinders;
         static const Core::Algorithms::AlgorithmParameterName DefaultMeshColor;
         static const Core::Algorithms::AlgorithmParameterName FaceTransparencyValue;

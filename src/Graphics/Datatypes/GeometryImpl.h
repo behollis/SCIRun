@@ -110,6 +110,7 @@ namespace SCIRun {
           POINTS,
           LINES,
           TRIANGLES,
+          QUADS
         };
 
         SpireIBO() : indexSize(0), prim(PRIMITIVE::POINTS) {}
