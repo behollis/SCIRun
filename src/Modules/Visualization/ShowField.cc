@@ -254,7 +254,7 @@ RenderState GeometryBuilder::getEdgeRenderState(
   renState.set(RenderState::IS_ON, state->getValue(ShowFieldModule::ShowEdges).toBool());
   renState.set(RenderState::USE_TRANSPARENT_EDGES, state->getValue(ShowFieldModule::EdgeTransparency).toBool());
   renState.set(RenderState::USE_CYLINDER, state->getValue(ShowFieldModule::EdgesAsCylinders).toInt() == 1);
-  renState.set(RenderState::USE_FAKED_VOLUMETRIC_EDGES, state->getValue(ShowFieldModule::EdgesAsFakedVolumetricLines).toInt() == 1);
+//  renState.set(RenderState::USE_FAKED_VOLUMETRIC_EDGES, state->getValue(ShowFieldModule::EdgesAsFakedVolumetricLines).toInt() == 1);
 
   renState.defaultColor = ColorRGB(state->getValue(ShowFieldModule::DefaultMeshColor).toString());
   renState.defaultColor = (renState.defaultColor.r() > 1.0 ||
@@ -365,10 +365,45 @@ GeometryHandle GeometryBuilder::buildGeometryObject(
 
   if (showEdges)
   {
-    renderEdges(field, colorMap, state, interruptible, getEdgeRenderState(state, colorMap), geom, geom->uniqueID());
+	//if ( render Cylinders or Lines)
+//    renderEdges(field, colorMap, state, interruptible, getEdgeRenderState(state, colorMap), geom, geom->uniqueID());
+    //else if ( render volumetric edges, we need to render faces )
+	int approxDiv = 1;
+	renderVolumetricEdges(field, colorMap, state, interruptible, getFaceRenderState(state, colorMap), geom, approxDiv, geom->uniqueID());
   }
 
   return geom;
+}
+
+void GeometryBuilder::renderVolumetricFaces(
+  boost::shared_ptr<Field> field,
+  boost::optional<boost::shared_ptr<ColorMap>> colorMap,
+  ModuleStateHandle moduleState,
+  Interruptible* interruptible,
+  RenderState state, GeometryHandle geom,
+  unsigned int approxDiv,
+  const std::string& id)
+{
+  VField* fld = field->vfield();
+  VMesh*  mesh = field->vmesh();
+
+  // Directly ported from SCIRUN 4. Unsure what 'linear' is.
+  // I'm assuming it means linear interpolation as opposed to nearest neighbor
+  // interpolation along the basis. But I could be wrong.
+  bool doLinear = (fld->basis_order() < 2 && mesh->basis_order() < 2 && approxDiv == 1);
+
+  // Todo: Check for texture -- this is indicative of volume rendering.
+  // if(mesh->is_regularmesh() && mesh->is_surface() &&
+  //    get_flag(render_state, USE_TEXTURE))
+
+  if (doLinear)
+  {
+    return renderVolumetricEdges(field, colorMap, moduleState, interruptible, state, geom, approxDiv, id);
+  }
+  else
+  {
+    std::cout << "Non linear faces not supported at this time." << std::endl;
+  }
 }
 
 
@@ -401,6 +436,459 @@ void GeometryBuilder::renderFaces(
   {
     std::cout << "Non linear faces not supported at this time." << std::endl;
   }
+}
+
+void GeometryBuilder::renderVolumetricEdges(
+  boost::shared_ptr<Field> field,
+  boost::optional<boost::shared_ptr<ColorMap>> colorMap,
+  ModuleStateHandle moduleState,
+  Interruptible* interruptible,
+  RenderState state,
+  GeometryHandle geom,
+  unsigned int approxDiv,
+  const std::string& id)
+{
+  VField* fld = field->vfield();
+  VMesh*  mesh = field->vmesh();
+
+  mesh->synchronize(Mesh::FACES_E);
+
+  VMesh::Face::size_type numFaces;
+
+  mesh->size(numFaces);
+
+  if (numFaces == 0)
+    return;
+
+  bool withNormals = (state.get(RenderState::USE_NORMALS));
+  if (withNormals) { mesh->synchronize(Mesh::NORMALS_E); }
+
+  bool invertNormals = moduleState->getValue(ShowFieldModule::FaceInvertNormals).toBool();
+  ColorScheme colorScheme = ColorScheme::COLOR_UNIFORM;
+  std::vector<double> svals;
+  std::vector<Vector> vvals;
+  std::vector<Tensor> tvals;
+  std::vector<ColorRGB> face_colors;
+
+  if (fld->basis_order() < 0 || state.get(RenderState::USE_DEFAULT_COLOR))
+  {
+    colorScheme = ColorScheme::COLOR_UNIFORM;
+  }
+  else if (state.get(RenderState::USE_COLORMAP))
+  {
+    colorScheme = ColorScheme::COLOR_MAP;
+  }
+  else // if (fld->basis_order() >= 0)
+  {
+    colorScheme = ColorScheme::COLOR_IN_SITU;
+  }
+
+  // Three 32 bit ints to index into the VBO
+  uint32_t iboSize = static_cast<uint32_t>(mesh->num_faces() * sizeof(uint32_t) * 3);
+  //Seven floats per VBO: Pos (3) XYZ, and Color (4) RGBA
+  uint32_t vboSize = static_cast<uint32_t>(mesh->num_faces() * sizeof(float) * 7);
+
+  // Construct VBO and IBO that will be used to render the faces. Once again,
+  // IBOs are not strictly needed. But, we may be able to optimize this code
+  // somewhat.
+  /// \todo Switch to unique_ptrs and move semantics.
+  std::shared_ptr<CPM_VAR_BUFFER_NS::VarBuffer> iboBufferSPtr(
+    new CPM_VAR_BUFFER_NS::VarBuffer(vboSize));
+  std::shared_ptr<CPM_VAR_BUFFER_NS::VarBuffer> vboBufferSPtr(
+    new CPM_VAR_BUFFER_NS::VarBuffer(iboSize));
+
+  // Accessing the pointers like this is contrived. We only do this for
+  // speed since we will be using the pointers in a tight inner loop.
+  CPM_VAR_BUFFER_NS::VarBuffer* iboBuffer = iboBufferSPtr.get();
+  CPM_VAR_BUFFER_NS::VarBuffer* vboBuffer = vboBufferSPtr.get();
+
+  uint32_t iboIndex = 0;
+  int64_t numVBOElements = 0;
+
+  VMesh::Face::iterator fiter, fiterEnd;
+  VMesh::Node::array_type nodes;
+
+  mesh->begin(fiter);
+  mesh->end(fiterEnd);
+
+  Point idpt;
+  mesh->get_nodes(nodes, *fiter);
+  mesh->get_point(idpt, nodes[0]);
+
+  while (fiter != fiterEnd)
+  {
+    interruptible->checkForInterruption();
+
+    mesh->get_nodes(nodes, *fiter);
+
+    std::vector<Point> points(nodes.size());
+    std::vector<Vector> normals(nodes.size());
+
+    //std::cout << "Node Size: " << nodes.size() << std::endl;
+
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+      mesh->get_point(points[i], nodes[i]);
+    }
+
+    //TODO fix so the withNormals tp be woth lighting is called correctly, and the meshes are fixed.
+    if (withNormals)
+    {
+      bool useFaceNormals = state.get(RenderState::USE_FACE_NORMALS) && mesh->has_normals();
+      if (useFaceNormals)
+      {
+        for (size_t i = 0; i < nodes.size(); i++)
+        {
+          auto norm = normals[i];
+          normals[i] = invertNormals ? -norm : norm;
+          mesh->get_normal(normals[i], nodes[i]);
+        }
+      }
+      else
+      {
+        /// Fix normal of Quads
+        if (points.size() == 4)
+        {
+          Vector edge1 = points[1] - points[0];
+          Vector edge2 = points[2] - points[1];
+          Vector edge3 = points[3] - points[2];
+          Vector edge4 = points[0] - points[3];
+
+          Vector norm = Cross(edge1, edge2) + Cross(edge2, edge3) + Cross(edge3, edge4) + Cross(edge4, edge1);
+
+          norm.normalize();
+
+          for (size_t i = 0; i < nodes.size(); i++)
+          {
+            normals[i] = invertNormals ? -norm : norm;
+          }
+        }
+        /// Fix Normals of Tris
+        else
+        {
+          Vector edge1 = points[1] - points[0];
+          Vector edge2 = points[2] - points[1];
+          Vector norm = Cross(edge1, edge2);
+
+          norm.normalize();
+
+          for (size_t i = 0; i < nodes.size(); i++)
+          {
+            normals[i] = invertNormals ? -norm : norm;
+          }
+          //For future reference for a try at smoother rendering
+          /*
+          for (size_t i = 0; i < nodes.size(); i++)
+          {
+          mesh->get_normal(normals[i], nodes[i]);
+          }
+          */
+        }
+      }
+    }
+    // Default color single face no matter the element data.
+    if (colorScheme == ColorScheme::COLOR_UNIFORM)
+    {
+      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+        colorScheme, face_colors, state);
+    }
+    // Element data (Cells) so two sided faces.
+    else if (fld->basis_order() == 0 && mesh->dimensionality() == 3)
+    {
+      auto map = colorMap.get();
+      //two possible colors.
+      svals.resize(2);
+      vvals.resize(2);
+      tvals.resize(2);
+      face_colors = {{ColorRGB(1.,1.,1.),ColorRGB(1.,1.,1.)}};
+
+      VMesh::Elem::array_type cells;
+      mesh->get_elems(cells, *fiter);
+
+      if (fld->is_scalar())
+      {
+        fld->get_value(svals[0], cells[0]);
+
+        if (cells.size() > 1)
+        {
+          fld->get_value(svals[1], cells[1]);
+        }
+        else
+        {
+          svals[1] = svals[0];
+        }
+        face_colors[0] = map->valueToColor(svals[0]);
+        face_colors[1] = map->valueToColor(svals[1]);
+      }
+      else if (fld->is_vector())
+      {
+        fld->get_value(vvals[0], cells[0]);
+
+        if (cells.size() > 1)
+        {
+          fld->get_value(vvals[1], cells[1]);
+        }
+        else
+        {
+          svals[1] = svals[0];
+        }
+
+        face_colors[0] = map->valueToColor(vvals[0]);
+        face_colors[1] = map->valueToColor(vvals[1]);
+      }
+      else if (fld->is_tensor())
+      {
+        fld->get_value(tvals[0], cells[0]);
+
+        if (cells.size() > 1)
+        {
+          fld->get_value(tvals[1], cells[1]);
+        }
+        else
+        {
+          svals[1] = svals[0];
+        }
+
+        face_colors[0] = map->valueToColor(tvals[0]);
+        face_colors[1] = map->valueToColor(tvals[1]);
+      }
+
+      state.set(RenderState::IS_DOUBLE_SIDED, true);
+
+      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+        colorScheme, face_colors, state);
+    }
+    // Element data (faces)
+    else if (fld->basis_order() == 0 && mesh->dimensionality() == 2)
+    {
+      auto map = colorMap.get();
+      //one possible color, each node that color.
+      svals.resize(1);
+      vvals.resize(1);
+      tvals.resize(1);
+      face_colors.resize(nodes.size());
+      if (fld->is_scalar())
+      {
+        fld->get_value(svals[0], *fiter);
+        face_colors[0] = map->valueToColor(svals[0]);
+      }
+      else if (fld->is_vector())
+      {
+        fld->get_value(vvals[0], *fiter);
+        face_colors[0] = map->valueToColor(vvals[0]);
+      }
+      else if (fld->is_tensor())
+      {
+        fld->get_value(tvals[0], *fiter);
+        face_colors[0] = map->valueToColor(tvals[0]);
+      }
+
+      // Same color at all corners.
+      for (size_t i = 0; i<nodes.size(); ++i)
+      {
+        face_colors[i] = face_colors[0];
+      }
+
+      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+        colorScheme, face_colors,  state);
+    }
+
+    // Data at nodes
+    else if (fld->basis_order() == 1)
+    {
+      auto map = colorMap.get();
+      svals.resize(nodes.size());
+      vvals.resize(nodes.size());
+      tvals.resize(nodes.size());
+      face_colors.resize(nodes.size());
+      //node.size() possible colors.
+      if (fld->is_scalar())
+      {
+        for (size_t i = 0; i<nodes.size(); i++)
+        {
+          fld->get_value(svals[i], nodes[i]);
+          face_colors[i] = map->valueToColor(svals[i]);
+        }
+      }
+      else if (fld->is_vector())
+      {
+        for (size_t i = 0; i<nodes.size(); i++)
+        {
+          fld->get_value(vvals[i], nodes[i]);
+          face_colors[i] = map->valueToColor(vvals[i]);
+        }
+      }
+      else if (fld->is_tensor())
+      {
+        for (size_t i = 0; i<nodes.size(); i++)
+        {
+          fld->get_value(tvals[i], nodes[i]);
+          face_colors[i] = map->valueToColor(tvals[i]);
+        }
+      }
+
+      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+        colorScheme, face_colors, state);
+    }
+
+    ++fiter;
+    ++numVBOElements;
+  }
+
+  std::stringstream ss;
+  ss << invertNormals << static_cast<int>(colorScheme) << faceTransparencyValue_;
+
+  std::string uniqueNodeID = id + "face" + ss.str();
+  std::string vboName = uniqueNodeID + "VBO";
+  std::string iboName = uniqueNodeID + "IBO";
+  std::string passName = uniqueNodeID + "Pass";
+
+  // NOTE: Attributes will depend on the color scheme. We will want to
+  // normalize the colors if the color scheme is COLOR_IN_SITU.
+
+  // Construct VBO.
+  std::string shader = "Shaders/UniformColor";
+  std::vector<SpireVBO::AttributeData> attribs;
+  attribs.push_back(SpireVBO::AttributeData("aPos", 3 * sizeof(float)));
+  std::vector<SpireSubPass::Uniform> uniforms;
+  if (withNormals)
+  {
+    attribs.push_back(SpireVBO::AttributeData("aNormal", 3 * sizeof(float)));
+  }
+
+  if (state.get(RenderState::USE_TRANSPARENCY))
+    uniforms.push_back(SpireSubPass::Uniform("uTransparency", faceTransparencyValue_));
+
+  if (colorScheme == ColorScheme::COLOR_MAP)
+  {
+    attribs.push_back(SpireVBO::AttributeData("aColor", 4 * sizeof(float)));
+
+    if (!state.get(RenderState::IS_DOUBLE_SIDED))
+    {
+      if (withNormals)
+      {
+        // Use colormapping lit shader.
+        shader = "Shaders/DirPhongCMap";
+        uniforms.push_back(SpireSubPass::Uniform("uAmbientColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 1.0f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 0.1f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularPower", 32.0f));
+      }
+      else
+      {
+        // Use colormapping only shader.
+        shader = "Shaders/ColorMap";
+      }
+    }
+    else
+    {
+      attribs.push_back(SpireVBO::AttributeData("aColorSecondary", 4 * sizeof(float)));
+
+      if (withNormals)
+      {
+        // Use colormapping lit shader.
+        shader = "Shaders/DblSided_DirPhongCMap";
+        uniforms.push_back(SpireSubPass::Uniform("uAmbientColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 1.0f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 0.1f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularPower", 32.0f));
+      }
+      else
+      {
+        // Use colormapping only shader.
+        shader = "Shaders/DblSided_ColorMap";
+      }
+    }
+  }
+  else if (colorScheme == ColorScheme::COLOR_IN_SITU)
+  {
+    attribs.push_back(SpireVBO::AttributeData("aColor", 4 * sizeof(float), true));
+
+    if (state.get(RenderState::IS_DOUBLE_SIDED) == false)
+    {
+      if (withNormals)
+      {
+        shader = "Shaders/InSituPhongColor";
+        uniforms.push_back(SpireSubPass::Uniform("uAmbientColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 1.0f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 0.1f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularPower", 32.0f));
+      }
+      else
+      {
+        // Use colormapping shader.
+        shader = "Shaders/InSituColor";
+      }
+    }
+    else
+    {
+      attribs.push_back(SpireVBO::AttributeData("aColorSecondary", 4 * sizeof(float), true));
+
+      if (withNormals)
+      {
+        shader = "Shaders/DblSided_InSituPhongColor";
+        uniforms.push_back(SpireSubPass::Uniform("uAmbientColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 1.0f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularColor",
+          glm::vec4(0.1f, 0.1f, 0.1f, 0.1f)));
+        uniforms.push_back(SpireSubPass::Uniform("uSpecularPower", 32.0f));
+      }
+      else
+      {
+        // Use colormapping shader.
+        shader = "Shaders/DblSided_InSituColor";
+      }
+    }
+  }
+  else if (colorScheme == ColorScheme::COLOR_UNIFORM)
+  {
+    ColorRGB defaultColor = state.defaultColor;
+
+    if (withNormals)
+    {
+      shader = "Shaders/DirPhong";
+      uniforms.push_back(SpireSubPass::Uniform("uAmbientColor",
+        glm::vec4(0.1f, 0.1f, 0.1f, 1.0f)));
+      uniforms.push_back(SpireSubPass::Uniform("uSpecularColor",
+        glm::vec4(0.1f, 0.1f, 0.1f, 0.1f)));
+      uniforms.push_back(SpireSubPass::Uniform("uSpecularPower", 32.0f));
+      uniforms.push_back(SpireSubPass::Uniform(
+        "uDiffuseColor", glm::vec4(defaultColor.r(), defaultColor.g(), defaultColor.b(), 1.0f)));
+    }
+    else
+    {
+      shader = "Shaders/UniformColor";
+      uniforms.push_back(SpireSubPass::Uniform(
+        "uColor", glm::vec4(defaultColor.r(), defaultColor.g(), defaultColor.b(), 1.0f)));
+    }
+  }
+
+  SpireVBO geomVBO(vboName, attribs, vboBufferSPtr,
+    numVBOElements, mesh->get_bounding_box(), true);
+
+  geom->mVBOs.push_back(geomVBO);
+
+  // Construct IBO.
+
+  SpireIBO geomIBO(iboName, SpireIBO::PRIMITIVE::TRIANGLES, sizeof(uint32_t), iboBufferSPtr);
+
+  geom->mIBOs.push_back(geomIBO);
+
+  SpireText text;
+
+  SpireSubPass pass(passName, vboName, iboName, shader,
+    colorScheme, state, RenderType::RENDER_VBO_IBO, geomVBO, geomIBO, text);
+
+  // Add all uniforms generated above to the pass.
+  for (const auto& uniform : uniforms) { pass.addUniform(uniform); }
+
+  geom->mPasses.push_back(pass);
+
+  /// \todo Add spheres and other glyphs as display lists. Will want to
+  ///       build up to geometry / tessellation shaders if support is present.
 }
 
 
@@ -1317,12 +1805,12 @@ void GeometryBuilder::renderEdges(
 
   std::string uniqueNodeID = id + "edge" + ss.str();
 
-  SpireIBO::PRIMITIVE primIn = SpireIBO::PRIMITIVE::LINES;
+  SpireIBO::PRIMITIVE primIn = SpireIBO::PRIMITIVE::POINTS;
   // Use cylinders...
-  if (state.get(RenderState::USE_CYLINDER))
-    primIn = SpireIBO::PRIMITIVE::TRIANGLES;
-  else if (state.get(RenderState::USE_FAKED_VOLUMETRIC_EDGES))
-    primIn = SpireIBO::PRIMITIVE::QUADS;
+
+//  if (state.get(RenderState::USE_CYLINDER)
+//     || state.get(RenderState::USE_FAKED_VOLUMETRIC_EDGES))
+//    primIn = SpireIBO::PRIMITIVE::TRIANGLES;
 
   GlyphGeom glyphs;
   while (eiter != eiter_end)
@@ -1389,28 +1877,24 @@ void GeometryBuilder::renderEdges(
       }
     }
     //accumulate VBO or IBO data
+/*
     if (state.get(RenderState::USE_CYLINDER) && p0 != p1)
     {
-/*
       glyphs.addCylinder(p0, p1, radius, num_strips, edge_colors[0], edge_colors[1]);
       glyphs.addSphere(p0, radius, num_strips, edge_colors[0]);
       glyphs.addSphere(p1, radius, num_strips, edge_colors[1]);
-*/
+
 
       Point p2( p0[0]+0.00001, p0[1], p0[2]);
       Point p3( p1[0]+0.00001, p1[1], p1[2]);
-/*
-      p2[0] = p0[0] + 0.0001;
-      p2[1] = p0[1];
-      p2[2] = p0[2];
-      p3[0] = p1[0] + 0.0001;
-      p3[1] = p1[1];
-      p3[2] = p1[2];
-*/
-      glyphs.addPlane(p0, p1, p2, p3, edge_colors[0]);
+
+//      glyphs.addPlane(p0, p1, p0, p1, edge_colors[0]);
     }
-    else if (state.get(RenderState::USE_FAKED_VOLUMETRIC_EDGES) && p0 != p1)
-    {
+    else //if (state.get(RenderState::USE_FAKED_VOLUMETRIC_EDGES) && p0 != p1)
+*/
+//    if (state.get(RenderState::USE_CYLINDER) && p0 != p1)
+//    {
+
       Point p2, p3;
       p2[0] = p0[0];
       p2[1] = p0[1];
@@ -1418,12 +1902,17 @@ void GeometryBuilder::renderEdges(
       p3[0] = p1[0];
       p3[1] = p1[1];
       p3[2] = p1[2];
-      glyphs.addPlane(p0, p1, p2, p3, edge_colors[0]);
-    }
-    else
-    {
-      glyphs.addLine(p0, p1, edge_colors[0], edge_colors[1]);
-    }
+
+      glyphs.addPoint(p0, edge_colors[0]);
+      glyphs.addPoint(p1, edge_colors[1]);
+//      glyphs.addPlane(p0, p1, p2, p3, edge_colors[0]);
+//      glyphs.addSphere(p0, radius, num_strips, edge_colors[0]);
+//      glyphs.addSphere(p1, radius, num_strips, edge_colors[1]);
+//    }
+//    else
+//    {
+//      glyphs.addLine(p0, p1, edge_colors[0], edge_colors[1]);
+//    }
 
     ++eiter;
   }
