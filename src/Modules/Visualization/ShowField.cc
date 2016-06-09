@@ -91,6 +91,15 @@ public:
     unsigned int approx_div,
     const std::string& id);
 
+  void renderVolumetricEdges(
+      FieldHandle field,
+      boost::optional<ColorMapHandle> colorMap,
+      ModuleStateHandle moduleState,
+      Interruptible* interruptible,
+      GeometryHandle geom,
+      unsigned int approx_div,
+      const std::string& id);
+
   void renderFacesLinear(
     FieldHandle field,
     boost::optional<ColorMapHandle> colorMap,
@@ -99,6 +108,15 @@ public:
     RenderState state, GeometryHandle geom,
     unsigned int approxDiv,
     const std::string& id);
+
+  void renderVolumetricEdgesAsFaces(
+      FieldHandle field,
+      boost::optional<ColorMapHandle> colorMap,
+      ModuleStateHandle moduleState,
+      Interruptible* interruptible,
+      GeometryHandle geom,
+      unsigned int approxDiv,
+      const std::string& id);
 
   void addFaceGeom(
     const std::vector<Point>  &points,
@@ -119,6 +137,8 @@ public:
     RenderState state,
     GeometryHandle geom,
     const std::string& id);
+
+
 
   RenderState getNodeRenderState(
     ModuleStateHandle state,
@@ -369,18 +389,18 @@ GeometryHandle GeometryBuilder::buildGeometryObject(
 //    renderEdges(field, colorMap, state, interruptible, getEdgeRenderState(state, colorMap), geom, geom->uniqueID());
     //else if ( render volumetric edges, we need to render faces )
 	int approxDiv = 1;
-	renderVolumetricEdges(field, colorMap, state, interruptible, getFaceRenderState(state, colorMap), geom, approxDiv, geom->uniqueID());
+	renderVolumetricEdges(field, colorMap, state, interruptible, geom, approxDiv, geom->uniqueID());
   }
 
   return geom;
 }
 
-void GeometryBuilder::renderVolumetricFaces(
+void GeometryBuilder::renderVolumetricEdges(
   boost::shared_ptr<Field> field,
   boost::optional<boost::shared_ptr<ColorMap>> colorMap,
   ModuleStateHandle moduleState,
   Interruptible* interruptible,
-  RenderState state, GeometryHandle geom,
+  GeometryHandle geom,
   unsigned int approxDiv,
   const std::string& id)
 {
@@ -398,7 +418,7 @@ void GeometryBuilder::renderVolumetricFaces(
 
   if (doLinear)
   {
-    return renderVolumetricEdges(field, colorMap, moduleState, interruptible, state, geom, approxDiv, id);
+    return renderVolumetricEdgesAsFaces(field, colorMap, moduleState, interruptible, geom, approxDiv, id);
   }
   else
   {
@@ -438,12 +458,11 @@ void GeometryBuilder::renderFaces(
   }
 }
 
-void GeometryBuilder::renderVolumetricEdges(
+void GeometryBuilder::renderVolumetricEdgesAsFaces(
   boost::shared_ptr<Field> field,
   boost::optional<boost::shared_ptr<ColorMap>> colorMap,
   ModuleStateHandle moduleState,
   Interruptible* interruptible,
-  RenderState state,
   GeometryHandle geom,
   unsigned int approxDiv,
   const std::string& id)
@@ -460,8 +479,8 @@ void GeometryBuilder::renderVolumetricEdges(
   if (numFaces == 0)
     return;
 
-  bool withNormals = (state.get(RenderState::USE_NORMALS));
-  if (withNormals) { mesh->synchronize(Mesh::NORMALS_E); }
+//  bool withNormals = (state.get(RenderState::USE_NORMALS));
+//  if (withNormals) { mesh->synchronize(Mesh::NORMALS_E); }
 
   bool invertNormals = moduleState->getValue(ShowFieldModule::FaceInvertNormals).toBool();
   ColorScheme colorScheme = ColorScheme::COLOR_UNIFORM;
@@ -470,10 +489,11 @@ void GeometryBuilder::renderVolumetricEdges(
   std::vector<Tensor> tvals;
   std::vector<ColorRGB> face_colors;
 
-  if (fld->basis_order() < 0 || state.get(RenderState::USE_DEFAULT_COLOR))
-  {
+//  if (fld->basis_order() < 0 || state.get(RenderState::USE_DEFAULT_COLOR))
+//  {
     colorScheme = ColorScheme::COLOR_UNIFORM;
-  }
+//  }
+/*
   else if (state.get(RenderState::USE_COLORMAP))
   {
     colorScheme = ColorScheme::COLOR_MAP;
@@ -482,6 +502,7 @@ void GeometryBuilder::renderVolumetricEdges(
   {
     colorScheme = ColorScheme::COLOR_IN_SITU;
   }
+*/
 
   // Three 32 bit ints to index into the VBO
   uint32_t iboSize = static_cast<uint32_t>(mesh->num_faces() * sizeof(uint32_t) * 3);
@@ -524,68 +545,31 @@ void GeometryBuilder::renderVolumetricEdges(
     std::vector<Point> points(nodes.size());
     std::vector<Vector> normals(nodes.size());
 
+    // Add two extra points to be expanded later in vs
+    Point* new_pt0 = new Point(points[0]);
+    Point* new_pt1 = new Point(points[1]);
+    points.push_back(*new_pt0);
+    points.push_back(*new_pt1);
+
     //std::cout << "Node Size: " << nodes.size() << std::endl;
 
     for (size_t i = 0; i < nodes.size(); i++)
     {
       mesh->get_point(points[i], nodes[i]);
     }
+    Vector edge1 = points[1] - points[0];
+    Vector edge2 = points[2] - points[3];
 
-    //TODO fix so the withNormals tp be woth lighting is called correctly, and the meshes are fixed.
-    if (withNormals)
+    // place-holder normal for now...
+    Vector norm = Cross(edge1, edge2);
+
+    norm.normalize();
+
+    for (size_t i = 0; i < nodes.size(); i++)
     {
-      bool useFaceNormals = state.get(RenderState::USE_FACE_NORMALS) && mesh->has_normals();
-      if (useFaceNormals)
-      {
-        for (size_t i = 0; i < nodes.size(); i++)
-        {
-          auto norm = normals[i];
-          normals[i] = invertNormals ? -norm : norm;
-          mesh->get_normal(normals[i], nodes[i]);
-        }
-      }
-      else
-      {
-        /// Fix normal of Quads
-        if (points.size() == 4)
-        {
-          Vector edge1 = points[1] - points[0];
-          Vector edge2 = points[2] - points[1];
-          Vector edge3 = points[3] - points[2];
-          Vector edge4 = points[0] - points[3];
-
-          Vector norm = Cross(edge1, edge2) + Cross(edge2, edge3) + Cross(edge3, edge4) + Cross(edge4, edge1);
-
-          norm.normalize();
-
-          for (size_t i = 0; i < nodes.size(); i++)
-          {
-            normals[i] = invertNormals ? -norm : norm;
-          }
-        }
-        /// Fix Normals of Tris
-        else
-        {
-          Vector edge1 = points[1] - points[0];
-          Vector edge2 = points[2] - points[1];
-          Vector norm = Cross(edge1, edge2);
-
-          norm.normalize();
-
-          for (size_t i = 0; i < nodes.size(); i++)
-          {
-            normals[i] = invertNormals ? -norm : norm;
-          }
-          //For future reference for a try at smoother rendering
-          /*
-          for (size_t i = 0; i < nodes.size(); i++)
-          {
-          mesh->get_normal(normals[i], nodes[i]);
-          }
-          */
-        }
-      }
+    normals[i] = invertNormals ? -norm : norm;
     }
+
     // Default color single face no matter the element data.
     if (colorScheme == ColorScheme::COLOR_UNIFORM)
     {
