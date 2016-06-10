@@ -481,8 +481,8 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
 
   mesh->size(numFaces);
 
-  if (numFaces == 0)
-    return;
+//  if (numFaces == 0)
+//    return;
 
 //  bool withNormals = (state.get(RenderState::USE_NORMALS));
 //  if (withNormals) { mesh->synchronize(Mesh::NORMALS_E); }
