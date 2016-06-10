@@ -467,6 +467,11 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
   unsigned int approxDiv,
   const std::string& id)
 {
+
+  RenderState state;
+
+  state.set(RenderState::IS_DOUBLE_SIDED, true);
+
   VField* fld = field->vfield();
   VMesh*  mesh = field->vmesh();
 
@@ -573,7 +578,7 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
     // Default color single face no matter the element data.
     if (colorScheme == ColorScheme::COLOR_UNIFORM)
     {
-      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+      addFaceGeom(points, normals, true, iboIndex, iboBuffer, vboBuffer,
         colorScheme, face_colors, state);
     }
     // Element data (Cells) so two sided faces.
@@ -639,7 +644,7 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
 
       state.set(RenderState::IS_DOUBLE_SIDED, true);
 
-      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+      addFaceGeom(points, normals, true, iboIndex, iboBuffer, vboBuffer,
         colorScheme, face_colors, state);
     }
     // Element data (faces)
@@ -673,7 +678,7 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
         face_colors[i] = face_colors[0];
       }
 
-      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+      addFaceGeom(points, normals, true, iboIndex, iboBuffer, vboBuffer,
         colorScheme, face_colors,  state);
     }
 
@@ -711,7 +716,7 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
         }
       }
 
-      addFaceGeom(points, normals, withNormals, iboIndex, iboBuffer, vboBuffer,
+      addFaceGeom(points, normals, true, iboIndex, iboBuffer, vboBuffer,
         colorScheme, face_colors, state);
     }
 
@@ -735,7 +740,11 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
   std::vector<SpireVBO::AttributeData> attribs;
   attribs.push_back(SpireVBO::AttributeData("aPos", 3 * sizeof(float)));
   std::vector<SpireSubPass::Uniform> uniforms;
-  if (withNormals)
+
+  bool withNormals = true;
+
+//  if (withNormals)
+  if (true)
   {
     attribs.push_back(SpireVBO::AttributeData("aNormal", 3 * sizeof(float)));
   }
@@ -749,7 +758,8 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
 
     if (!state.get(RenderState::IS_DOUBLE_SIDED))
     {
-      if (withNormals)
+//      if (withNormals)
+      if (true)
       {
         // Use colormapping lit shader.
         shader = "Shaders/DirPhongCMap";
@@ -769,7 +779,8 @@ void GeometryBuilder::renderVolumetricEdgesAsFaces(
     {
       attribs.push_back(SpireVBO::AttributeData("aColorSecondary", 4 * sizeof(float)));
 
-      if (withNormals)
+//      if (withNormals)
+      if (true)
       {
         // Use colormapping lit shader.
         shader = "Shaders/DblSided_DirPhongCMap";
