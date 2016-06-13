@@ -35,6 +35,7 @@ SET(Modules_Visualization_SRCS
   ShowColorMapModule.cc
   RescaleColorMap.cc
   TextBuilder.cc
+  GenerateTrajectoryDensityProjectionStreamlines.cc
 )
 
 SET(Modules_Visualization_HEADERS
@@ -47,6 +48,7 @@ SET(Modules_Visualization_HEADERS
   RescaleColorMap.h
   TextBuilder.h
   share.h
+  GenerateTrajectoryDensityProjectionStreamlines.h
 )
 
 SCIRUN_ADD_LIBRARY(Modules_Visualization 
