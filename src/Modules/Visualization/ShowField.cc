@@ -386,10 +386,12 @@ GeometryHandle GeometryBuilder::buildGeometryObject(
   if (showEdges)
   {
 	//if ( render Cylinders or Lines)
-//    renderEdges(field, colorMap, state, interruptible, getEdgeRenderState(state, colorMap), geom, geom->uniqueID());
+    renderEdges(field, colorMap, state, interruptible, getEdgeRenderState(state, colorMap), geom, geom->uniqueID());
     //else if ( render volumetric edges, we need to render faces )
+/*
 	int approxDiv = 1;
 	renderVolumetricEdges(field, colorMap, state, interruptible, geom, approxDiv, geom->uniqueID());
+*/
   }
 
   return geom;
@@ -1800,7 +1802,7 @@ void GeometryBuilder::renderEdges(
 
   std::string uniqueNodeID = id + "edge" + ss.str();
 
-  SpireIBO::PRIMITIVE primIn = SpireIBO::PRIMITIVE::POINTS;
+  SpireIBO::PRIMITIVE primIn = SpireIBO::PRIMITIVE::LINES;
   // Use cylinders...
 
 //  if (state.get(RenderState::USE_CYLINDER)
@@ -1898,15 +1900,19 @@ void GeometryBuilder::renderEdges(
       p3[1] = p1[1];
       p3[2] = p1[2];
 
-      glyphs.addPoint(p0, edge_colors[0]);
-      glyphs.addPoint(p1, edge_colors[1]);
+//      glyphs.addPoint(p0, edge_colors[0]);
+//      glyphs.addPoint(p1, edge_colors[1]);
 //      glyphs.addPlane(p0, p1, p2, p3, edge_colors[0]);
 //      glyphs.addSphere(p0, radius, num_strips, edge_colors[0]);
 //      glyphs.addSphere(p1, radius, num_strips, edge_colors[1]);
 //    }
 //    else
 //    {
-//      glyphs.addLine(p0, p1, edge_colors[0], edge_colors[1]);
+      glyphs.addLine(p0, p1, edge_colors[0], edge_colors[1]);
+
+//      glyphs.addSphere(p0, 2, 10, edge_colors[0]);
+//      glyphs.addSphere(p1, 2, 10, edge_colors[1]);
+
 //    }
 
     ++eiter;
