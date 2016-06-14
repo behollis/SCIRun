@@ -31,7 +31,7 @@
 
 #include <Dataflow/Network/Module.h>
 #include <Core/Thread/Interruptible.h>
-#include <Modules/Visualization/share.h>
+#include <Modules/Legacy/Visualization/share.h>
 
 namespace SCIRun {
   namespace Modules {
@@ -58,3 +58,4 @@ namespace SCIRun {
 };
 
 #endif
+

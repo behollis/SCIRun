@@ -92,3 +92,4 @@ void GenerateTrajectoryDensityProjectionStreamlines::execute()
     sendOutputFromAlgorithm(Streamlines, output);
   }
 }
+
