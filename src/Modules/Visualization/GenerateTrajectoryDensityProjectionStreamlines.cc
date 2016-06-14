@@ -26,13 +26,14 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-//    File   : GenerateTrajectoryDensityStreamLines.cc
+//    File   : GenerateTrajectoryDensityProjectionStreamlines.cc
 //    Author : Brad E. Hollister
 //    Date   : June 2016
 
-#include <Modules/Legacy/Visualization/GenerateTrajectoryDensityStreamLines.h>
-#include <Core/Algorithms/Legacy/Fields/StreamLines/GenerateTrajectoryDensityStreamLines.h>
+#include <Modules/Visualization/GenerateTrajectoryDensityProjectionStreamlines.h>
+#include <Core/Algorithms/Legacy/Fields/StreamLines/GenerateStreamLines.h>
 #include <Core/Datatypes/Legacy/Field/Field.h>
+
 
 using namespace SCIRun::Modules::Visualization;
 using namespace SCIRun::Core::Datatypes;
@@ -41,16 +42,16 @@ using namespace SCIRun::Core::Algorithms;
 using namespace SCIRun::Core::Algorithms::Fields;
 using namespace SCIRun;
 
-const ModuleLookupInfo GenerateTrajectoryDensityStreamLines::staticInfo_("GenerateTrajectoryDensityStreamLines", "Visualization", "SCIRun");
+const ModuleLookupInfo GenerateTrajectoryDensityProjectionStreamlines::staticInfo_("GenerateTrajectoryDensityProjectionStreamlines", "Visualization", "SCIRun");
 
-GenerateTrajectoryDensityStreamLines::GenerateTrajectoryDensityStreamLines() : Module(staticInfo_)
+GenerateTrajectoryDensityProjectionStreamlines::GenerateTrajectoryDensityProjectionStreamlines() : Module(staticInfo_)
 {
   INITIALIZE_PORT(Vector_Field);
   INITIALIZE_PORT(Seed_Points);
   INITIALIZE_PORT(Streamlines);
 }
 
-void GenerateTrajectoryDensityStreamLines::setStateDefaults()
+void GenerateTrajectoryDensityProjectionStreamlines::setStateDefaults()
 {
   auto state = get_state();
   setStateStringFromAlgoOption(Parameters::StreamlineDirection);
@@ -63,7 +64,7 @@ void GenerateTrajectoryDensityStreamLines::setStateDefaults()
   setStateBoolFromAlgo(Parameters::RemoveColinearPoints);
 }
 
-void GenerateTrajectoryDensityStreamLines::execute()
+void GenerateTrajectoryDensityProjectionStreamlines::execute()
 {
   auto input = getRequiredInput(Vector_Field);
   auto seeds = getRequiredInput(Seed_Points);

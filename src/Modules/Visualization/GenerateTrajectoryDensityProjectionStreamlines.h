@@ -26,8 +26,8 @@
    DEALINGS IN THE SOFTWARE.
    */
 
-#ifndef MODULES_LEGACY_VISUALIZATION_GENERATETRAJECTORYDENSITYSTREAMLINES_H_
-#define MODULES_LEGACY_VISUALIZATION_GENERATETRAJECTORYDENSITYSTREAMLINES_H_
+#ifndef MODULES_LEGACY_VISUALIZATION_GENERATETRAJECTORYDENSITYPROJECTIONSTREAMLINES_H_
+#define MODULES_LEGACY_VISUALIZATION_GENERATETRAJECTORYDENSITYPROJECTIONSTREAMLINES_H_
 
 #include <Dataflow/Network/Module.h>
 #include <Core/Thread/Interruptible.h>
@@ -37,13 +37,13 @@ namespace SCIRun {
   namespace Modules {
     namespace Visualization {
 
-      class SCISHARE GenerateStreamLines : public Dataflow::Networks::Module,
+      class SCISHARE GenerateTrajectoryDensityProjectionStreamlines : public Dataflow::Networks::Module,
         public Has2InputPorts<FieldPortTag, FieldPortTag>,
         public Has1OutputPort<FieldPortTag>,
         public Core::Thread::Interruptible
       {
       public:
-        GenerateTrajectoryDensityStreamLines();
+        GenerateTrajectoryDensityProjectionStreamlines();
         virtual void setStateDefaults() override;
         virtual void execute() override;
 
