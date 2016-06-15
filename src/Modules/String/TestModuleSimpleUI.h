@@ -8,6 +8,7 @@ namespace SCIRun {
 namespace Modules {
 namespace StringManip {
 class SCISHARE TestModuleSimpleUI : public SCIRun::Dataflow::Networks::Module,
+//public Has1InputPort<StringPortTag>
 public HasNoInputPorts,
 public Has1OutputPort<StringPortTag>
 {

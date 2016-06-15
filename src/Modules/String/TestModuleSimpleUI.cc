@@ -29,7 +29,8 @@ void
 TestModuleSimpleUI::execute()
 {
   std::string message_string;
-  message_string = "[Personalize your message here.]";
+  auto state = get_state();
+  message_string = state->getValue(FormatString).toString();
   StringHandle msH(new String(message_string));
   sendOutput(OutputString, msH);
 }
