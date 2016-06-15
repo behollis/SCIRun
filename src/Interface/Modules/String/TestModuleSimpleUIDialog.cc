@@ -33,6 +33,8 @@ using namespace SCIRun::Gui;
 using namespace SCIRun::Dataflow::Networks;
 using namespace SCIRun::Modules::StringManip;
 
+
+
 TestModuleSimpleUIDialog::TestModuleSimpleUIDialog(const std::string& name, ModuleStateHandle state,
   QWidget* parent /* = 0 */)
   : ModuleDialogGeneric(state, parent)
@@ -40,6 +42,8 @@ TestModuleSimpleUIDialog::TestModuleSimpleUIDialog(const std::string& name, Modu
   setupUi(this);
   setWindowTitle(QString::fromStdString(name));
   fixSize();
+
+  addLineEditManager(inputstring_, TestModuleSimpleUI::FormatString);
 
 //  addCheckBoxManager(knob1CheckBox_, Parameters::Knob1);
 //  addDoubleSpinBoxManager(knob2SpinBox_, Parameters::Knob2);

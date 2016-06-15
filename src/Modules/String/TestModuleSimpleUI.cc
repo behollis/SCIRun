@@ -8,11 +8,21 @@ using namespace SCIRun::Dataflow::Networks;
 /// @class TestModuleSimpleUI
 /// @brief This module splits out a string.
 
+// page 25 of SCIRun5ModuleGeneration.pdf had typo. PrintStringIntoString -> TestModuleSimple UI
+
+SCIRun::Core::Algorithms::AlgorithmParameterName TestModuleSimpleUI::FormatString("FormatString");
+
 const ModuleLookupInfo TestModuleSimpleUI::staticInfo_("TestModuleSimpleUI",
 "String", "SCIRun");
 TestModuleSimpleUI::TestModuleSimpleUI() : Module(staticInfo_)
 {
   INITIALIZE_PORT(OutputString);
+}
+
+void TestModuleSimpleUI::setStateDefaults()
+{
+  auto state = get_state();
+  state->setValue(FormatString,std::string ("[Insert message here]"));
 }
 
 void
