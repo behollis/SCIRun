@@ -46,6 +46,7 @@ SET(Interface_Modules_Math_FORMS
   CollectMatrices.ui
   ReportMatrixSliceMeasureDialog.ui
   SetSubmatrix.ui
+  SortMatrixDialog.ui
 )
 
 SET(Interface_Modules_Math_HEADERS
@@ -68,6 +69,7 @@ SET(Interface_Modules_Math_HEADERS
   CollectMatricesDialog.h
   ReportMatrixSliceMeasureDialog.h
   SetSubmatrixDialog.h
+  SortMatrixDialog.h
 )
 
 IF(WITH_QWT_WIDGETS)
@@ -95,6 +97,7 @@ SET(Interface_Modules_Math_SOURCES
   CollectMatricesDialog.cc
   ReportMatrixSliceMeasureDialog.cc
   SetSubmatrixDialog.cc
+  SortMatrixDialog.cc
 )
 
 QT4_WRAP_UI(Interface_Modules_Math_FORMS_HEADERS ${Interface_Modules_Math_FORMS})

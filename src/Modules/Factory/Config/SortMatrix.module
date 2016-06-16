@@ -1,0 +1,20 @@
+{
+  "module": {
+  "name": "SortMatrix",
+  "namespace": "Math",
+  "status": "new module.",
+  "description": "sorts a matrix.",
+  "header": "Modules/Math/SortMatrix.h"
+  },
+  
+  "algorithm": {
+  "name": "N/A",
+  "namespace": "N/A",
+  "header": "N/A"
+  },
+  
+  "UI": {
+  "name": "SortMatrixDialog",
+  "header": "Interface/Modules/Math/SortMatrixDialog.h"
+  }
+}
