@@ -1,6 +1,7 @@
 #include <Core/Algorithms/Math/SortMatrixAlgo.h>
 #include <Core/Datatypes/MatrixTypeConversions.h>
 #include <Core/Math/MiscMath.h>
+
 using namespace SCIRun;
 using namespace SCIRun::Core::Datatypes;
 using namespace SCIRun::Core::Algorithms;
@@ -17,16 +18,19 @@ SortMatrixAlgo::run_generic(const AlgorithmInput& input) const
 {
   auto input_matrix = input.get<Matrix>(Variables::InputMatrix);
   AlgorithmOutput output;
+
   //sparse support not fully implemented yet.
-  if (!matrix_is::dense(input_matrix))
+  if (!matrixIs::dense(input_matrix))
   {
     //TODO implement something with sparse
     error("SortMatrix: Currently only works with dense matrices");
     output[Variables::OutputMatrix] = 0;
     return output;
   }
-  auto mat = matrix_cast::as_dense (input_matrix);
+
+  auto mat = castMatrix::toDense(input_matrix);
   DenseMatrixHandle return_matrix;
+
   //pull parameter from UI
   auto method = get(Variables::Method).toInt();
   Sort(mat,return_matrix,method);
@@ -42,11 +46,14 @@ SortMatrixAlgo::Sort(DenseMatrixHandle input, DenseMatrixHandle& output, int met
     error("SortAscending: no input matrix found");
     return false;
   }
+
   //get size of original matrix
   size_type nrows = input->nrows();
   size_type ncols = input->ncols();
+
   //copy original matrix for processing
   output.reset(new DenseMatrix(*input));
+
   //pointer to matrix data
   double *data = output->data();
   if (!output)
@@ -54,15 +61,18 @@ SortMatrixAlgo::Sort(DenseMatrixHandle input, DenseMatrixHandle& output, int met
     error("ApplyRowOperation: could not create output matrix");
     return false;
   }
+
   size_type n = nrows*ncols;
 
   //call the sorting functions
   Quicksort(data,0,n-1);
+
   if (method==1)
   {
     //if set to descending, reverse the order.
     output.reset(new DenseMatrix(output -> reverse()));
   }
+
   return true;
 }
 
@@ -73,11 +83,12 @@ SortMatrixAlgo::Quicksort(double* input, index_type lo, index_type hi) const
   index_type ind;
   if (lo<hi)
   {
-    ind=Partition(input,lo,hi);
+    ind = Partition(input,lo,hi);
     Quicksort(input,lo,ind-1);
     Quicksort(input,ind+1,hi);
   }
-    return true;
+
+  return true;
 }
 
 index_type
@@ -88,6 +99,7 @@ SortMatrixAlgo::Partition(double* input, index_type lo, index_type hi) const
   index_type ind=lo;
   double pivot = input[hi];
   double tmp;
+
   for (index_type k=lo;k<hi;k++)
   {
     if (input[k]<=pivot)
@@ -102,5 +114,6 @@ SortMatrixAlgo::Partition(double* input, index_type lo, index_type hi) const
   tmp=input[ind];
   input[ind]=input[hi];
   input[hi]=tmp;
+
   return ind;
 }
