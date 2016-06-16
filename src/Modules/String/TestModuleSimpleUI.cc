@@ -23,13 +23,23 @@ void TestModuleSimpleUI::setStateDefaults()
 {
   auto state = get_state();
   state->setValue(FormatString,std::string ("[Insert message here]"));
+
+  INITIALIZE_PORT(InputString);
+  INITIALIZE_PORT(OutputString);
 }
 
 void
 TestModuleSimpleUI::execute()
 {
   std::string message_string;
+  auto stringH = getOptionalInput(InputString);
   auto state = get_state();
+
+  if (stringH && *stringH)
+  {
+    state->setValue(FormatString, (*stringH)->value());
+  }
+
   message_string = state->getValue(FormatString).toString();
   StringHandle msH(new String(message_string));
   sendOutput(OutputString, msH);
