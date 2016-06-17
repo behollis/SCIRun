@@ -33,7 +33,7 @@ SortMatrix::execute()
   if ( needToExecute() )
   {
     setAlgoIntFromState(Variables::Method);
-    auto output = algo().run_generic( withInputData((InputMatrix, input)) );
+    auto output = algo().run( withInputData((InputMatrix, input)) );
     sendOutputFromAlgorithm(OutputMatrix, output);
   }
 }

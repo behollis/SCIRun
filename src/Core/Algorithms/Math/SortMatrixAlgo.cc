@@ -14,7 +14,7 @@ SortMatrixAlgo::SortMatrixAlgo()
 }
 
 AlgorithmOutput
-SortMatrixAlgo::run_generic(const AlgorithmInput& input) const
+SortMatrixAlgo::run(const AlgorithmInput& input) const
 {
   auto input_matrix = input.get<Matrix>(Variables::InputMatrix);
   AlgorithmOutput output;

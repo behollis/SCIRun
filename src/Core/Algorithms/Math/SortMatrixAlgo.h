@@ -21,7 +21,7 @@ namespace SCIRun {
         public:
           SortMatrixAlgo();
 
-          AlgorithmOutput run_generic(const AlgorithmInput& input) const;
+          virtual AlgorithmOutput run(const AlgorithmInput& input) const;
 
           bool Sort(Datatypes::DenseMatrixHandle input, Datatypes::DenseMatrixHandle& output, int method) const;
 
