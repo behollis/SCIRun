@@ -27,6 +27,7 @@
 #
 
 SET(Modules_Visualization_SRCS
+  GenerateDensityProjectionStreamLines.cc
   CreateStandardColorMap.cc
   MatrixAsVectorField.cc
   ShowField.cc
@@ -38,6 +39,7 @@ SET(Modules_Visualization_SRCS
 )
 
 SET(Modules_Visualization_HEADERS
+  GenerateDensityProjectionStreamLines.h
   CreateStandardColorMap.h
   MatrixAsVectorField.h
   ShowField.h
