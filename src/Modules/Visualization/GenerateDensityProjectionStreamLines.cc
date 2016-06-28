@@ -52,6 +52,7 @@ GenerateDensityProjectionStreamLines::GenerateDensityProjectionStreamLines() : M
   INITIALIZE_PORT(Streamlines);
 }
 
+/*
 void
 GenerateDensityProjectionStreamLines::execute()
 {
@@ -59,6 +60,49 @@ GenerateDensityProjectionStreamLines::execute()
   message_string = "[Personalize your message here.]";
 //  StringHandle msH(new String(message_string));
 //  sendOutput(OutputString, msH);
+}
+*/
+
+void GenerateDensityProjectionStreamLines::setStateDefaults()
+{
+  auto state = get_state();
+  setStateStringFromAlgoOption(Parameters::StreamlineDirection);
+  setStateStringFromAlgoOption(Parameters::StreamlineValue);
+  setStateIntFromAlgo(Parameters::StreamlineMaxSteps);
+  setStateDoubleFromAlgo(Parameters::StreamlineStepSize);
+  setStateDoubleFromAlgo(Parameters::StreamlineTolerance);
+  setStateStringFromAlgoOption(Parameters::StreamlineMethod);
+  setStateBoolFromAlgo(Parameters::AutoParameters);
+  setStateBoolFromAlgo(Parameters::RemoveColinearPoints);
+}
+
+void GenerateDensityProjectionStreamLines::execute()
+{
+  auto input = getRequiredInput(Vector_Field);
+  auto seeds = getRequiredInput(Seed_Points);
+
+  if (needToExecute())
+  {
+    update_state(Executing);
+
+    setAlgoDoubleFromState(Parameters::StreamlineStepSize);
+    setAlgoDoubleFromState(Parameters::StreamlineTolerance);
+    setAlgoOptionFromState(Parameters::StreamlineDirection);
+    setAlgoOptionFromState(Parameters::StreamlineValue);
+    setAlgoIntFromState(Parameters::StreamlineMaxSteps);
+    setAlgoBoolFromState(Parameters::RemoveColinearPoints);
+    setAlgoBoolFromState(Parameters::AutoParameters);
+    setAlgoOptionFromState(Parameters::StreamlineMethod);
+
+    auto output = algo().run(withInputData((Vector_Field, input)(Seed_Points, seeds)));
+
+    #ifdef NEED_ALGO_OUTPUT
+    gui_tolerance_.set(algo_.get_scalar("tolerance"));
+    gui_step_size_.set(algo_.get_scalar("step_size"));
+    #endif
+
+    sendOutputFromAlgorithm(Streamlines, output);
+  }
 }
 
 #if 0

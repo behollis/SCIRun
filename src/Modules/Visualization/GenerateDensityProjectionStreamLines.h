@@ -18,8 +18,8 @@ namespace SCIRun {
       {
       public:
         GenerateDensityProjectionStreamLines();
-        virtual void execute();
-        virtual void setStateDefaults() {};
+        virtual void execute() override;
+        virtual void setStateDefaults() override;
         static const Dataflow::Networks::ModuleLookupInfo staticInfo_;
 
         INPUT_PORT(0, Vector_Field, LegacyField);
