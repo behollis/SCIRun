@@ -27,6 +27,34 @@
    */
 
 #include <Modules/Visualization/GenerateDensityProjectionStreamLines.h>
+#include <Core/Datatypes/String.h>
+using namespace SCIRun;
+using namespace SCIRun::Modules::Visualization;
+//using namespace SCIRun::Modules::StringManip;
+using namespace SCIRun::Core::Datatypes;
+using namespace SCIRun::Dataflow::Networks;
+/// @class TestModuleSimple
+/// @brief This module splits out a string.
+
+const ModuleLookupInfo GenerateDensityProjectionStreamLines::staticInfo_("GenerateDensityProjectionStreamLines",
+"Visualization", "SCIRun");
+GenerateDensityProjectionStreamLines::GenerateDensityProjectionStreamLines() : Module(staticInfo_,false)
+{
+  INITIALIZE_PORT(OutputString);
+}
+
+void
+GenerateDensityProjectionStreamLines::execute()
+{
+  std::string message_string;
+  message_string = "[Personalize your message here.]";
+//  StringHandle msH(new String(message_string));
+//  sendOutput(OutputString, msH);
+}
+
+
+#if 0
+#include <Modules/Visualization/GenerateDensityProjectionStreamLines.h>
 #include <Core/Datatypes/Legacy/Field/VMesh.h>
 #include <Core/Datatypes/Legacy/Field/Field.h>
 #include <Core/Datatypes/Legacy/Field/VField.h>
@@ -127,3 +155,5 @@ ALGORITHM_PARAMETER_DEF(Visualization, AutoScale);
 ALGORITHM_PARAMETER_DEF(Visualization, Symmetric);
 ALGORITHM_PARAMETER_DEF(Visualization, FixedMin);
 ALGORITHM_PARAMETER_DEF(Visualization, FixedMax);
+
+#endif
