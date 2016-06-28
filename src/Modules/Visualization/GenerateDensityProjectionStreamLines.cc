@@ -27,12 +27,18 @@
    */
 
 #include <Modules/Visualization/GenerateDensityProjectionStreamLines.h>
-#include <Core/Datatypes/String.h>
+//#include <Core/Datatypes/String.h>
+#include <Core/Algorithms/Legacy/Fields/StreamLines/GenerateStreamLines.h>
+#include <Core/Datatypes/Legacy/Field/Field.h>
+
 using namespace SCIRun;
 using namespace SCIRun::Modules::Visualization;
 //using namespace SCIRun::Modules::StringManip;
 using namespace SCIRun::Core::Datatypes;
 using namespace SCIRun::Dataflow::Networks;
+using namespace SCIRun::Core::Algorithms;
+using namespace SCIRun::Core::Algorithms::Fields;
+
 /// @class TestModuleSimple
 /// @brief This module splits out a string.
 
@@ -40,7 +46,10 @@ const ModuleLookupInfo GenerateDensityProjectionStreamLines::staticInfo_("Genera
 "Visualization", "SCIRun");
 GenerateDensityProjectionStreamLines::GenerateDensityProjectionStreamLines() : Module(staticInfo_,false)
 {
-  INITIALIZE_PORT(OutputString);
+//  INITIALIZE_PORT(OutputString);
+  INITIALIZE_PORT(Vector_Field);
+  INITIALIZE_PORT(Seed_Points);
+  INITIALIZE_PORT(Streamlines);
 }
 
 void
@@ -52,108 +61,67 @@ GenerateDensityProjectionStreamLines::execute()
 //  sendOutput(OutputString, msH);
 }
 
-
 #if 0
-#include <Modules/Visualization/GenerateDensityProjectionStreamLines.h>
-#include <Core/Datatypes/Legacy/Field/VMesh.h>
+#include <Modules/Legacy/Visualization/GenerateStreamLines.h>
+#include <Core/Algorithms/Legacy/Fields/StreamLines/GenerateStreamLines.h>
 #include <Core/Datatypes/Legacy/Field/Field.h>
-#include <Core/Datatypes/Legacy/Field/VField.h>
-#include <Core/Datatypes/ColorMap.h>
 
 using namespace SCIRun::Modules::Visualization;
 using namespace SCIRun::Core::Datatypes;
 using namespace SCIRun::Dataflow::Networks;
-using namespace SCIRun::Core::Algorithms::Visualization;
+using namespace SCIRun::Core::Algorithms;
+using namespace SCIRun::Core::Algorithms::Fields;
+using namespace SCIRun;
 
-const ModuleLookupInfo GenerateDensityProjectionStreamLines::staticInfo_("GenerateDensityProjectionStreamLines", "Visualization", "SCIRun");
+const ModuleLookupInfo GenerateStreamLines::staticInfo_("GenerateStreamLines", "Visualization", "SCIRun");
 
-GenerateDensityProjectionStreamLines::GenerateDensityProjectionStreamLines() : Module(staticInfo_)
+GenerateStreamLines::GenerateStreamLines() : Module(staticInfo_)
 {
-  INITIALIZE_PORT(Field);
-  INITIALIZE_PORT(ColorMapObject);
-  INITIALIZE_PORT(ColorMapOutput);
+  INITIALIZE_PORT(Vector_Field);
+  INITIALIZE_PORT(Seed_Points);
+  INITIALIZE_PORT(Streamlines);
 }
 
-void GenerateDensityProjectionStreamLines::setStateDefaults()
+void GenerateStreamLines::setStateDefaults()
 {
   auto state = get_state();
-  state->setValue(Parameters::AutoScale, 0);
-  state->setValue(Parameters::Symmetric, false);
-  state->setValue(Parameters::FixedMin, 0.0);
-  state->setValue(Parameters::FixedMax, 1.0);
+  setStateStringFromAlgoOption(Parameters::StreamlineDirection);
+  setStateStringFromAlgoOption(Parameters::StreamlineValue);
+  setStateIntFromAlgo(Parameters::StreamlineMaxSteps);
+  setStateDoubleFromAlgo(Parameters::StreamlineStepSize);
+  setStateDoubleFromAlgo(Parameters::StreamlineTolerance);
+  setStateStringFromAlgoOption(Parameters::StreamlineMethod);
+  setStateBoolFromAlgo(Parameters::AutoParameters);
+  setStateBoolFromAlgo(Parameters::RemoveColinearPoints);
 }
-/**
- * @name execute
- *
- * @brief This module has a simple algorithm to ensure the field data scales into ColorMap space.
- *
- * The "input" for this algorithm/module is the field data and the color map from
- *  CreateStandardColorMap module. The "output" is a new color map that applies the rescaling
- *  options from this module: rescale_shift, and rescale_scale.
- */
-void GenerateDensityProjectionStreamLines::execute()
+
+void GenerateStreamLines::execute()
 {
-  auto fields = getRequiredDynamicInputs(Field);
-  auto colorMap = getRequiredInput(ColorMapObject);
+  auto input = getRequiredInput(Vector_Field);
+  auto seeds = getRequiredInput(Seed_Points);
 
   if (needToExecute())
   {
-    auto state = get_state();
-    auto autoscale = state->getValue(Parameters::AutoScale).toInt() == 0;
-    auto symmetric = state->getValue(Parameters::Symmetric).toBool();
-    auto fixed_min = state->getValue(Parameters::FixedMin).toDouble();
-    auto fixed_max = state->getValue(Parameters::FixedMax).toDouble();
+    update_state(Executing);
 
-    double cm_scale = 1.;
-    double cm_shift = 0.;
+    setAlgoDoubleFromState(Parameters::StreamlineStepSize);
+    setAlgoDoubleFromState(Parameters::StreamlineTolerance);
+    setAlgoOptionFromState(Parameters::StreamlineDirection);
+    setAlgoOptionFromState(Parameters::StreamlineValue);
+    setAlgoIntFromState(Parameters::StreamlineMaxSteps);
+    setAlgoBoolFromState(Parameters::RemoveColinearPoints);
+    setAlgoBoolFromState(Parameters::AutoParameters);
+    setAlgoOptionFromState(Parameters::StreamlineMethod);
 
-    //set the min/max values to the actual min/max if we choose auto
-    double actual_min = std::numeric_limits<double>::max();
-    double actual_max = std::numeric_limits<double>::min();
-    double min,max;
+    auto output = algo().run(withInputData((Vector_Field, input)(Seed_Points, seeds)));
 
-    for (const auto& field : fields)
-    {
-      if (!field->vfield()->minmax(min, max))
-      {
-        error("An input field is not a scalar or vector field.");
-        return;
-      }
-      actual_min = std::min(actual_min, min);
-      actual_max = std::max(actual_max, max);
-    }
+    #ifdef NEED_ALGO_OUTPUT
+    gui_tolerance_.set(algo_.get_scalar("tolerance"));
+    gui_step_size_.set(algo_.get_scalar("step_size"));
+    #endif
 
-    if (autoscale)
-    {
-      //center around zero
-      if (symmetric)
-      {
-        double mx = std::max(std::abs(actual_min), std::abs(actual_max));
-        fixed_min = -mx;
-        fixed_max = mx;
-      }
-      else
-      {
-        fixed_min = actual_min;
-        fixed_max = actual_max;
-      }
-      state->setValue(Parameters::FixedMin, fixed_min);
-      state->setValue(Parameters::FixedMax, fixed_max);
-    }
-    cm_shift =  - fixed_min;
-    cm_scale = 1. / (fixed_max - fixed_min);
-
-    sendOutput(ColorMapOutput, StandardColorMapFactory::create(colorMap->getColorMapName(),
-      colorMap->getColorMapResolution(),
-      colorMap->getColorMapShift(),
-      colorMap->getColorMapInvert(),
-      cm_scale, cm_shift));
+    sendOutputFromAlgorithm(Streamlines, output);
   }
 }
-
-ALGORITHM_PARAMETER_DEF(Visualization, AutoScale);
-ALGORITHM_PARAMETER_DEF(Visualization, Symmetric);
-ALGORITHM_PARAMETER_DEF(Visualization, FixedMin);
-ALGORITHM_PARAMETER_DEF(Visualization, FixedMax);
-
 #endif
+
