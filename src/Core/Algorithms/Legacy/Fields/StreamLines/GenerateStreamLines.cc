@@ -208,7 +208,8 @@ GenerateStreamLinesAlgoP::runImpl()
 
     // Try to find the streamline for each seed point.
     VMesh::size_type num_seeds = seed_mesh_->num_nodes();
-    VMesh::Node::array_type newnodes(2);
+//    VMesh::Node::array_type newnodes(2);
+    VMesh::Node::array_type newnodes(4); // Adding quad instead of point.
 
     for (VMesh::Node::index_type idx=1; idx<num_seeds; ++idx)
     {
@@ -275,51 +276,88 @@ GenerateStreamLinesAlgoP::runImpl()
         p1 = *node_iter;
         n1 = omesh_->add_point(p1);
 
-	// Record the streamline point indexes. Used downstream.
-	//std::ostringstream str;
-	//str << "Streamline " << (unsigned int) idx << " Node Index";
-	//ofield_->set_property( str.str(), (unsigned int) n1, false );
+        // Adding quad instead of point here...
+        Point p2(p1);
+        VMesh::Node::index_type n2 = omesh_->add_point(p2);
+
+        newnodes[0] = n1;
+        newnodes[1] = n2;
+
+//        Point p3(*(node_iter + 1));
+//        Point p4(p3);
+
+//        VMesh::Node::index_type p1id, p2id, p3id, p4id;
+//        p1id = omesh_->add_point(p1); p2id = omesh_->add_point(p2);
+//        p3id = omesh_->add_point(p3); p4id = omesh_->add_point(p4);
+
+//        VMesh::Node::array_type facenodes(4);
+//        facenodes[0] = p1id; facenodes[1] = p2id;
+//        facenodes[2] = p3id; facenodes[3] = p4id;
+
+//        omesh_->add_elem(facenodes);
+
+  // Record the streamline point indexes. Used downstream.
+  //std::ostringstream str;
+  //str << "Streamline " << (unsigned int) idx << " Node Index";
+  //ofield_->set_property( str.str(), (unsigned int) n1, false );
 
         ofield_->resize_values();
 
-        if (value_ == SeedValue) ofield_->copy_value(seed_field_, idx, n1);
-        else if (value_ == SeedIndex) ofield_->set_value(index_type(idx), n1);
+        if (value_ == SeedValue) ofield_->copy_value(field_, idx, n1);
+        else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n1);
         else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n1);
         else if (value_ == IntegrationStep) ofield_->set_value(0, n1);
         else if (value_ == DistanceFromSeed) ofield_->set_value(0, n1);
         else if (value_ == StreamlineLength) ofield_->set_value(length, n1);
-
         ++node_iter;
+
         cc++;
 
         while (node_iter != BI.nodes_.end())
         {
-          n2 = omesh_->add_point(*node_iter);
-          ofield_->resize_fdata();
+          Point p3 = *node_iter;
+          VMesh::Node::index_type n3 = omesh_->add_point(*node_iter);
 
-          if (value_ == SeedValue) ofield_->copy_value(seed_field_, idx, n2);
-          else if (value_ == SeedIndex) ofield_->set_value(index_type(idx), n2);
-          else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n2);
+          // Adding quad instead of point here...
+          Point p4(p3);
+          VMesh::Node::index_type n4 = omesh_->add_point(p4);
+
+          ofield_->resize_values();
+
+//          if (value_ == SeedValue) ofield_->copy_value(field_, idx, n2);
+//          else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n2);
+//          else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n2);
+//          else if (value_ == IntegrationStep)
+          if (value_ == SeedValue) ofield_->copy_value(field_, idx, n3);
+          else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n3);
+          else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n3);
           else if (value_ == IntegrationStep)
           {
-            length = Vector( *node_iter-p1 ).length();
-            ofield_->set_value(length,n2);
+//            length = Vector( *node_iter-p1 ).length();
+            length = Vector( p3-p1 ).length();
+//            ofield_->set_value(length,n2);
+            ofield_->set_value(length,n3);
           }
           else if (value_ == DistanceFromSeed)
           {
-            length += Vector( *node_iter-p1 ).length();
-            ofield_->set_value(length,n2);
+//            length += Vector( *node_iter-p1 ).length();
+//            ofield_->set_value(length,n2);
+            length += Vector( p3-p1 ).length();
+            ofield_->set_value(length,n3);
           }
           else if (value_ == StreamlineLength)
-	        {
-	           ofield_->set_value(length,n2);
+         {
+//            ofield_->set_value(length,n2);
+            ofield_->set_value(length,n3);
           }
 
-          newnodes[0] = n1;
-          newnodes[1] = n2;
+          newnodes[2] = n3;
+          newnodes[3] = n4;
 
           omesh_->add_elem(newnodes);
-          n1 = n2;
+
+          n1 = n3;
+          n2 = n4;
           ++node_iter;
 
           cc++;
@@ -450,7 +488,8 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
 
     std::vector<Point>::iterator node_iter;
     VMesh::Node::index_type n1, n2;
-    VMesh::Node::array_type newnodes(2);
+//    VMesh::Node::array_type newnodes(2);
+    VMesh::Node::array_type newnodes(4); // quad instead of edge
 
     // Try to find the streamline for each seed point.
     VMesh::size_type num_seeds = seed_mesh_->num_nodes();
@@ -511,7 +550,27 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
       if (node_iter != nodes.end())
       {
         p1 = *node_iter;
-        n1 = omesh_->add_point(*node_iter);
+        n1 = omesh_->add_point(p1);
+
+        // Adding quad instead of point here...
+        Point p2(p1);
+        VMesh::Node::index_type n2 = omesh_->add_point(p2);
+
+        newnodes[0] = n1;
+        newnodes[1] = n2;
+
+//        Point p3(*(node_iter + 1));
+//        Point p4(p3);
+
+//        VMesh::Node::index_type p1id, p2id, p3id, p4id;
+//        p1id = omesh_->add_point(p1); p2id = omesh_->add_point(p2);
+//        p3id = omesh_->add_point(p3); p4id = omesh_->add_point(p4);
+
+//        VMesh::Node::array_type facenodes(4);
+//        facenodes[0] = p1id; facenodes[1] = p2id;
+//        facenodes[2] = p3id; facenodes[3] = p4id;
+
+//        omesh_->add_elem(facenodes);
 
 	// Record the streamline point indexes. Used downstream.
 	//std::ostringstream str;
@@ -532,33 +591,49 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
 
         while (node_iter != nodes.end())
         {
-          n2 = omesh_->add_point(*node_iter);
+          Point p3 = *node_iter;
+          VMesh::Node::index_type n3 = omesh_->add_point(*node_iter);
+
+          // Adding quad instead of point here...
+          Point p4(p3);
+          VMesh::Node::index_type n4 = omesh_->add_point(p4);
+
           ofield_->resize_values();
 
-          if (value_ == SeedValue) ofield_->copy_value(field_, idx, n2);
-          else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n2);
-          else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n2);
+//          if (value_ == SeedValue) ofield_->copy_value(field_, idx, n2);
+//          else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n2);
+//          else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n2);
+//          else if (value_ == IntegrationStep)
+          if (value_ == SeedValue) ofield_->copy_value(field_, idx, n3);
+          else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n3);
+          else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n3);
           else if (value_ == IntegrationStep)
           {
-            length = Vector( *node_iter-p1 ).length();
-            ofield_->set_value(length,n2);
+//            length = Vector( *node_iter-p1 ).length();
+            length = Vector( p3-p1 ).length();
+//            ofield_->set_value(length,n2);
+            ofield_->set_value(length,n3);
           }
           else if (value_ == DistanceFromSeed)
           {
-            length += Vector( *node_iter-p1 ).length();
-            ofield_->set_value(length,n2);
+//            length += Vector( *node_iter-p1 ).length();
+//            ofield_->set_value(length,n2);
+            length += Vector( p3-p1 ).length();
+            ofield_->set_value(length,n3);
           }
           else if (value_ == StreamlineLength)
 	       {
-	          ofield_->set_value(length,n2);
+//	          ofield_->set_value(length,n2);
+            ofield_->set_value(length,n3);
           }
 
-          newnodes[0] = n1;
-          newnodes[1] = n2;
+          newnodes[2] = n3;
+          newnodes[3] = n4;
 
           omesh_->add_elem(newnodes);
 
-          n1 = n2;
+          n1 = n3;
+          n2 = n4;
           ++node_iter;
 
           cc++;
