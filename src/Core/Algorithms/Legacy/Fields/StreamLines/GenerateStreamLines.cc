@@ -303,8 +303,8 @@ GenerateStreamLinesAlgoP::runImpl()
 
         ofield_->resize_values();
 
-        if (value_ == SeedValue) ofield_->copy_value(field_, idx, n1);
-        else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n1);
+        if (value_ == SeedValue) ofield_->copy_value(seed_field_, idx, n1);
+        else if (value_ == SeedIndex) ofield_->set_value(index_type(idx), n1);
         else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n1);
         else if (value_ == IntegrationStep) ofield_->set_value(0, n1);
         else if (value_ == DistanceFromSeed) ofield_->set_value(0, n1);
@@ -328,8 +328,8 @@ GenerateStreamLinesAlgoP::runImpl()
 //          else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n2);
 //          else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n2);
 //          else if (value_ == IntegrationStep)
-          if (value_ == SeedValue) ofield_->copy_value(field_, idx, n3);
-          else if (value_ == SeedIndex) ofield_->set_value(static_cast<int>(idx), n3);
+          if (value_ == SeedValue) ofield_->copy_value(seed_field_, idx, n3);
+          else if (value_ == SeedIndex) ofield_->set_value(index_type(idx), n3);
           else if (value_ == IntegrationIndex) ofield_->set_value(abs(cc), n3);
           else if (value_ == IntegrationStep)
           {
