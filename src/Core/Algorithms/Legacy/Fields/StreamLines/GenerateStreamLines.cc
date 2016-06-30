@@ -278,10 +278,7 @@ GenerateStreamLinesAlgoP::runImpl()
 
         // Adding quad instead of point here...
         Point p2(p1);
-//        n2 = omesh_->add_point(p2);
-
-        newnodes2[0] = n1;
-        newnodes2[1] = n2;
+        n2 = omesh_->add_point(p2);
 
   // Record the streamline point indexes. Used downstream.
   //std::ostringstream str;
@@ -307,7 +304,7 @@ GenerateStreamLinesAlgoP::runImpl()
 
           // Adding quad instead of point here...
           Point p4(p3);
-//          n4 = omesh_->add_point(p4);
+          n4 = omesh_->add_point(p4);
 
           ofield_->resize_values();
 
@@ -329,13 +326,15 @@ GenerateStreamLinesAlgoP::runImpl()
             ofield_->set_value(length,n3);
           }
 
+          newnodes2[0] = n1;
+          newnodes2[1] = n2;
           newnodes2[2] = n3;
           newnodes2[3] = n4;
 
-          newnodes[0] = n1;
-          newnodes[1] = n3;
+//          newnodes[0] = n1;
+//          newnodes[1] = n3;
 
-          omesh_->add_elem(newnodes);
+          omesh_->add_elem(newnodes2);
 
           n1 = n3;
           n2 = n4;
@@ -468,7 +467,7 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
     nodes.reserve(max_steps_);
 
     std::vector<Point>::iterator node_iter;
-    VMesh::Node::index_type n1, n2;
+    VMesh::Node::index_type n1, n2, n3, n4;
 //    VMesh::Node::array_type newnodes(2);
     VMesh::Node::array_type newnodes(4); // quad instead of edge
 
@@ -535,10 +534,8 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
 
         // Adding quad instead of point here...
         Point p2(p1);
-        VMesh::Node::index_type n2 = omesh_->add_point(p2);
+        n2 = omesh_->add_point(p2);
 
-        newnodes[0] = n1;
-        newnodes[1] = n2;
 
 //        Point p3(*(node_iter + 1));
 //        Point p4(p3);
@@ -573,11 +570,11 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
         while (node_iter != nodes.end())
         {
           Point p3 = *node_iter;
-          VMesh::Node::index_type n3 = omesh_->add_point(*node_iter);
+          n3 = omesh_->add_point(*node_iter);
 
           // Adding quad instead of point here...
           Point p4(p3);
-          VMesh::Node::index_type n4 = omesh_->add_point(p4);
+          n4 = omesh_->add_point(p4);
 
           ofield_->resize_values();
 
@@ -603,11 +600,13 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
             ofield_->set_value(length,n3);
           }
           else if (value_ == StreamlineLength)
-	       {
+	        {
 //	          ofield_->set_value(length,n2);
             ofield_->set_value(length,n3);
           }
 
+          newnodes[0] = n1;
+          newnodes[1] = n2;
           newnodes[2] = n3;
           newnodes[3] = n4;
 
@@ -782,7 +781,8 @@ bool GenerateStreamLinesAlgo::runImpl(FieldHandle input, FieldHandle seeds, Fiel
   }
 
   FieldInformation fi(input);
-  fi.make_curvemesh();
+  fi.make_quadsurfmesh();
+//  fi.make_curvemesh();
   fi.make_lineardata();
   fi.make_linearmesh();
   fi.make_double();

@@ -634,7 +634,7 @@
 									<name>RNGSeed</name>
 									<value>
 										<which>0</which>
-										<value>12</value>
+										<value>14</value>
 									</value>
 								</second>
 							</item>
@@ -1402,7 +1402,7 @@
 									<name>EdgesAsCylinders</name>
 									<value>
 										<which>0</which>
-										<value>1</value>
+										<value>0</value>
 									</value>
 								</second>
 							</item>
@@ -1450,7 +1450,7 @@
 									<name>FacesAvailable</name>
 									<value>
 										<which>3</which>
-										<value>0</value>
+										<value>1</value>
 									</value>
 								</second>
 							</item>
