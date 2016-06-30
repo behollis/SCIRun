@@ -712,10 +712,12 @@ void GeometryBuilder::renderFacesLinear(
   // normalize the colors if the color scheme is COLOR_IN_SITU.
 
   // Construct VBO.
-  std::string shader = "Shaders/UniformColor";
+  std::string shader = "home/behollis/workspace/scirun-fork/src/Shdrs/TrajectoryDensityProjection";
   std::vector<SpireVBO::AttributeData> attribs;
   attribs.push_back(SpireVBO::AttributeData("aPos", 3 * sizeof(float)));
   std::vector<SpireSubPass::Uniform> uniforms;
+
+#if 0
   if (withNormals)
   {
     attribs.push_back(SpireVBO::AttributeData("aNormal", 3 * sizeof(float)));
@@ -830,6 +832,7 @@ void GeometryBuilder::renderFacesLinear(
         "uColor", glm::vec4(defaultColor.r(), defaultColor.g(), defaultColor.b(), 1.0f)));
     }
   }
+#endif
 
   SpireVBO geomVBO(vboName, attribs, vboBufferSPtr,
     numVBOElements, mesh->get_bounding_box(), true);
