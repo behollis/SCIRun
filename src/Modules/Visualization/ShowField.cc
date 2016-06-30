@@ -712,7 +712,7 @@ void GeometryBuilder::renderFacesLinear(
   // normalize the colors if the color scheme is COLOR_IN_SITU.
 
   // Construct VBO.
-  std::string shader = "home/behollis/workspace/scirun-fork/src/Shdrs/TrajectoryDensityProjection";
+  std::string shader = "Shaders/TrajectoryDensityProjection";
   std::vector<SpireVBO::AttributeData> attribs;
   attribs.push_back(SpireVBO::AttributeData("aPos", 3 * sizeof(float)));
   std::vector<SpireSubPass::Uniform> uniforms;

@@ -210,6 +210,7 @@ GenerateStreamLinesAlgoP::runImpl()
     VMesh::size_type num_seeds = seed_mesh_->num_nodes();
     VMesh::Node::array_type newnodes(2);
     VMesh::Node::array_type newnodes2(4); // Adding quad instead of point.
+//    omesh_->dimension_ = 3;
 
     for (VMesh::Node::index_type idx=1; idx<num_seeds; ++idx)
     {
@@ -470,6 +471,7 @@ GenerateStreamLinesAccAlgo::run(const AlgorithmBase* algo,
     VMesh::Node::index_type n1, n2, n3, n4;
 //    VMesh::Node::array_type newnodes(2);
     VMesh::Node::array_type newnodes(4); // quad instead of edge
+//    omesh_->dimension_ = 3;
 
     // Try to find the streamline for each seed point.
     VMesh::size_type num_seeds = seed_mesh_->num_nodes();
@@ -782,6 +784,7 @@ bool GenerateStreamLinesAlgo::runImpl(FieldHandle input, FieldHandle seeds, Fiel
 
   FieldInformation fi(input);
   fi.make_quadsurfmesh();
+//  fi.make_hexvolmesh();
 //  fi.make_curvemesh();
   fi.make_lineardata();
   fi.make_linearmesh();
