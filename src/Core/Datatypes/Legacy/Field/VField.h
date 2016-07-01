@@ -55,6 +55,11 @@ public:
     pm_(0),
     vmesh_(0),
     vfdata_(0),
+    vfdata_radius_(0),
+    vfdata_tangX_(0),
+    vfdata_tangY_(0),
+    vfdata_tangZ_(0),
+    vfdata_color_(0),
     basis_order_(0),
     number_of_nodes_(0),
     number_of_enodes_(0),
@@ -109,6 +114,11 @@ public:
       VMesh::dimension_type dim;
       dim.resize(1); dim[0] = 0;
       vfdata_->resize_fdata(dim);
+      vfdata_radius_->resize_fdata(dim);
+      vfdata_tangX_->resize_fdata(dim);
+      vfdata_tangY_->resize_fdata(dim);
+      vfdata_tangZ_->resize_fdata(dim);
+      vfdata_color_->resize_fdata(dim);
       // do nothing
     }
     else if (basis_order_ == 0)
@@ -116,12 +126,22 @@ public:
       VMesh::dimension_type dim;
       vmesh_->get_elem_dimensions(dim);
       vfdata_->resize_fdata(dim);
+      vfdata_radius_->resize_fdata(dim);
+      vfdata_tangX_->resize_fdata(dim);
+      vfdata_tangY_->resize_fdata(dim);
+      vfdata_tangZ_->resize_fdata(dim);
+      vfdata_color_->resize_fdata(dim);
     }
     else if (basis_order_ == 1)
     {
       VMesh::dimension_type dim;
       vmesh_->get_dimensions(dim);
       vfdata_->resize_fdata(dim);
+      vfdata_radius_->resize_fdata(dim);
+      vfdata_tangX_->resize_fdata(dim);
+      vfdata_tangY_->resize_fdata(dim);
+      vfdata_tangZ_->resize_fdata(dim);
+      vfdata_color_->resize_fdata(dim);
     }
     else if (basis_order_ == 2)
     {
@@ -129,6 +149,16 @@ public:
       vmesh_->get_dimensions(dim);
       vfdata_->resize_fdata(dim);
       vfdata_->resize_efdata(dim);
+      vfdata_radius_->resize_fdata(dim);
+      vfdata_tangX_->resize_fdata(dim);
+      vfdata_tangY_->resize_fdata(dim);
+      vfdata_tangZ_->resize_fdata(dim);
+      vfdata_color_->resize_fdata(dim);
+      vfdata_radius_->resize_efdata(dim);
+      vfdata_tangX_->resize_efdata(dim);
+      vfdata_tangY_->resize_efdata(dim);
+      vfdata_tangZ_->resize_efdata(dim);
+      vfdata_color_->resize_efdata(dim);
     }
   }
 
@@ -224,6 +254,19 @@ public:
   /// likewise get_evalue is replaced by set set_evalue
   template<class T> inline void set_value(const T& val, index_type idx)
   { vfdata_->set_value(val,idx); }
+
+  // adding vertex attrib data to node...
+  template<class T> inline void set_value_radius(const T& val, index_type idx)
+    { vfdata_radius_->set_value(val,idx); }
+  template<class T> inline void set_value_tangX(const T& val, index_type idx)
+    { vfdata_tangX_->set_value(val,idx); }
+  template<class T> inline void set_value_tangY(const T& val, index_type idx)
+    { vfdata_tangY_->set_value(val,idx); }
+  template<class T> inline void set_value_tangZ(const T& val, index_type idx)
+    { vfdata_tangZ_->set_value(val,idx); }
+  template<class T> inline void set_value_color(const T& val, index_type idx)
+     { vfdata_color_->set_value(val,idx); }
+
   template<class T> inline void set_evalue(const T& val, index_type idx)
   { vfdata_->set_evalue(val,idx); }
   template<class T>  inline void set_value(const T& val, VMesh::Node::index_type idx)
@@ -240,6 +283,7 @@ public:
   { vfdata_->set_value(val,static_cast<VMesh::index_type>(idx)); }
   template<class T>  inline void set_value(const T& val, VMesh::ENode::index_type idx)
   { vfdata_->set_evalue(val,static_cast<VMesh::index_type>(idx)); }
+
 
   /// Get/Set all values at once
   template<class T> inline void set_values(const std::vector<T>& values)
@@ -705,6 +749,11 @@ protected:
   // Interface to the data in the field
   VMesh*        vmesh_;
   VFData*       vfdata_;
+  VFData*       vfdata_radius_;
+  VFData*       vfdata_tangX_;
+  VFData*       vfdata_tangY_;
+  VFData*       vfdata_tangZ_;
+  VFData*       vfdata_color_;
 
   // Information from the basis
   int           basis_order_;
