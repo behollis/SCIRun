@@ -285,20 +285,6 @@ GenerateStreamLinesAlgoP::runImpl()
         // 2. tangent approx; 3 doubles
         // 3. color indx lookup
 
-        Vector tangent( *( node_iter + 1 ) - p1 );
-
-        ofield_->set_value_radius(-1.0 , n1 );
-        ofield_->set_value_tangX(tangent[0] , n1 );
-        ofield_->set_value_tangY(tangent[1] , n1 );
-        ofield_->set_value_tangZ(tangent[2] , n1 );
-        ofield_->set_value_color( 0.0, n1 );
-
-        ofield_->set_value_radius(-1.0 , n2 );
-        ofield_->set_value_tangX(tangent[0] , n2);
-        ofield_->set_value_tangY(tangent[1] , n2 );
-        ofield_->set_value_tangZ(tangent[2] , n2 );
-        ofield_->set_value_color( 0.0, n2 );
-
   // Record the streamline point indexes. Used downstream.
   //std::ostringstream str;
   //str << "Streamline " << (unsigned int) idx << " Node Index";
