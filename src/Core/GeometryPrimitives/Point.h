@@ -50,6 +50,8 @@ class Point
 {
 private:
   double d_[3];
+  // vertex attributes, used for rendering
+  std::vector<double> vtx_attrib_;
 public:
   inline explicit Point(const Vector& v);
   inline Point(double x, double y, double z)
@@ -74,6 +76,8 @@ public:
   inline double& operator()(int idx);
   inline double operator()(int idx) const;
   inline void addscaled(const Point& p, const double scale);  // this += p * w;
+  inline void add_vertex_attrib(double attr)
+  { vtx_attrib_.push_back( attr ); }
   inline void x(const double);
   inline double x() const;
   inline void y(const double);

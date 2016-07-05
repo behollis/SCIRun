@@ -61,7 +61,7 @@ public:
     dimension_     = mesh_->dimensionality();
     /// cache whether we can edit the mesh by adding nodes and elements
     is_editable_   = mesh_->is_editable();
-    /// cache whether we haev surface normals
+    /// cache whether we have surface normals
     has_normals_   = mesh_->has_normals();   
     /// cache whether we have node points defined or whether we derive them
     /// implicitly. 

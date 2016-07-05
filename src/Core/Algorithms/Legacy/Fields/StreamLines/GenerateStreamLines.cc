@@ -275,15 +275,27 @@ GenerateStreamLinesAlgoP::runImpl()
       if (node_iter != BI.nodes_.end())
       {
         p1 = *node_iter;
-        n1 = omesh_->add_point(p1);
-
-        // Adding quad instead of point here...
         Point p2(p1);
-        n2 = omesh_->add_point(p2);
+
+        Vector tangent( *( node_iter + 1 ) - p1 );
 
         // 1. expansion radius
         // 2. tangent approx; 3 doubles
         // 3. color indx lookup
+        p1.add_vertex_attrib(-1.0);
+        p1.add_vertex_attrib(tangent[0]);
+        p1.add_vertex_attrib(tangent[1]);
+        p1.add_vertex_attrib(tangent[2]);
+        p1.add_vertex_attrib(0.0);
+
+        p2.add_vertex_attrib(+1.0);
+        p1.add_vertex_attrib(tangent[0]);
+        p1.add_vertex_attrib(tangent[1]);
+        p1.add_vertex_attrib(tangent[2]);
+        p1.add_vertex_attrib(0.0);
+
+        n1 = omesh_->add_point(p1);
+        n2 = omesh_->add_point(p2);
 
   // Record the streamline point indexes. Used downstream.
   //std::ostringstream str;
@@ -327,9 +339,35 @@ GenerateStreamLinesAlgoP::runImpl()
             ofield_->set_value(length,n3);
           }
           else if (value_ == StreamlineLength)
-         {
+          {
             ofield_->set_value(length,n3);
           }
+
+          Vector* tangent;
+          Point prev = *( node_iter - 1 );
+          if ( node_iter + 1 != BI.nodes_.end() ) {
+            tangent = new Vector( *( node_iter + 1 ) - prev );
+          } else {
+            // this is the last point in the sline
+            tangent = new Vector( *node_iter - prev );
+          }
+
+          // 1. expansion radius
+          // 2. tangent approx; 3 doubles
+          // 3. color indx lookup
+          p3.add_vertex_attrib(-1.0);
+          p3.add_vertex_attrib((*tangent)[0]);
+          p3.add_vertex_attrib((*tangent)[1]);
+          p3.add_vertex_attrib((*tangent)[2]);
+          p3.add_vertex_attrib(0.0);
+
+          p4.add_vertex_attrib(+1.0);
+          p4.add_vertex_attrib((*tangent)[0]);
+          p4.add_vertex_attrib((*tangent)[1]);
+          p4.add_vertex_attrib((*tangent)[2]);
+          p4.add_vertex_attrib(0.0);
+
+          delete tangent;
 
           newnodes2[0] = n1;
           newnodes2[1] = n2;
