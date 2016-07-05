@@ -715,6 +715,9 @@ void GeometryBuilder::renderFacesLinear(
   std::string shader = "Shaders/TrajectoryDensityProjection";
   std::vector<SpireVBO::AttributeData> attribs;
   attribs.push_back(SpireVBO::AttributeData("aPos", 3 * sizeof(float)));
+  attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
+  attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
+  attribs.push_back(SpireVBO::AttributeData("aColor", sizeof(int)));
   std::vector<SpireSubPass::Uniform> uniforms;
 
 #if 0
