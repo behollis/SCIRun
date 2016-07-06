@@ -906,14 +906,14 @@ void GeometryBuilder::addFaceGeom(
   // additions for trajectory density projection attributes
   auto writeVBORadius = [&vboBuffer](float radius)
   {
-    vboBuffer->write(static_cast<float>(radius);
+    vboBuffer->write(radius);
   };
 
   auto writeVBOTangent = [&vboBuffer](const Vector& tangent)
   {
-    vboBuffer->write(static_cast<float>(tangent.x());
-    vboBuffer->write(static_cast<float>(tangent.y());
-    vboBuffer->write(static_cast<float>(tangent.z());
+    vboBuffer->write( static_cast<float>(tangent.x()) );
+    vboBuffer->write( static_cast<float>(tangent.y()) );
+    vboBuffer->write( static_cast<float>(tangent.z()) );
   };
 
   auto writeIBOIndex = [&iboBuffer](uint32_t index)
@@ -969,27 +969,27 @@ void GeometryBuilder::addFaceGeom(
           writeVBONormal(normals[0]);
           writeVBORadius(points[0].get_radius());
           Vector tangent(points[0].get_tangent_x()
-                        , points[0].get_tangent_y()
-                        , points[0].get_tangent_z());
+                  , points[0].get_tangent_y()
+                  , points[0].get_tangent_z());
           writeVBOTangent(tangent);
           writeIBOIndex(iboIndex);
 
           writeVBOPoint(points[i - 1]);
           writeVBONormal(normals[i - 1]);
           writeVBORadius(points[i - 1].get_radius());
-          Vector tangent(points[i - 1].get_tangent_x()
-                        , points[i - 1].get_tangent_y()
-                        , points[i - 1].get_tangent_z());
-          writeVBOTangent(tangent);
+          Vector tangent2( points[i - 1].get_tangent_x()
+                         , points[i - 1].get_tangent_y()
+                         , points[i - 1].get_tangent_z());
+          writeVBOTangent(tangent2);
           writeIBOIndex(iboIndex + i - 1);
 
           writeVBOPoint(points[i]);
           writeVBONormal(normals[i]);
           writeVBORadius(points[i].get_radius());
-          Vector tangent(points[i].get_tangent_x()
-                        , points[i].get_tangent_y()
-                        , points[i].get_tangent_z());
-          writeVBOTangent(tangent);
+          Vector tangent3( points[i].get_tangent_x()
+                         , points[i].get_tangent_y()
+                         , points[i].get_tangent_z());
+          writeVBOTangent(tangent3);
           writeIBOIndex(iboIndex + i);
         }
         else
@@ -1004,18 +1004,18 @@ void GeometryBuilder::addFaceGeom(
 
           writeVBOPoint(points[i - 1]);
           writeVBORadius(points[i - 1].get_radius());
-          Vector tangent(points[i - 1].get_tangent_x()
+          Vector tangent2(points[i - 1].get_tangent_x()
                         , points[i - 1].get_tangent_y()
                         , points[i - 1].get_tangent_z());
-          writeVBOTangent(tangent);
+          writeVBOTangent(tangent2);
           writeIBOIndex(iboIndex + i - 1);
 
           writeVBOPoint(points[i]);
           writeVBORadius(points[i].get_radius());
-          Vector tangent(points[i].get_tangent_x()
+          Vector tangent3(points[i].get_tangent_x()
                         , points[i].get_tangent_y()
                         , points[i].get_tangent_z());
-          writeVBOTangent(tangent);
+          writeVBOTangent(tangent3);
           writeIBOIndex(iboIndex + i);
         }
       }

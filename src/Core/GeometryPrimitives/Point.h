@@ -76,12 +76,12 @@ public:
   inline double& operator()(int idx);
   inline double operator()(int idx) const;
   inline void addscaled(const Point& p, const double scale);  // this += p * w;
-  inline void add_vertex_attrib(double attr)
+  inline void add_vertex_attrib(const double attr)
   { vtx_attrib_.push_back( attr ); }
-  inline double get_radius() { return vtx_attrib_[0]; }
-  inline double get_tangent_x() { return vtx_attrib_[2]; }
-  inline double get_tangent_y() { return vtx_attrib_[3]; }
-  inline double get_tangent_z() { return vtx_attrib_[4]; }
+  inline double get_radius() const { return vtx_attrib_[0]; }
+  inline double get_tangent_x() const { return vtx_attrib_[1]; }
+  inline double get_tangent_y() const { return vtx_attrib_[2]; }
+  inline double get_tangent_z() const { return vtx_attrib_[3]; }
   inline void x(const double);
   inline double x() const;
   inline void y(const double);
