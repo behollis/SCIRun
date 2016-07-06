@@ -451,7 +451,8 @@ void GeometryBuilder::renderFacesLinear(
   // Three 32 bit ints to index into the VBO
   uint32_t iboSize = static_cast<uint32_t>(mesh->num_faces() * sizeof(uint32_t) * 3);
   //Seven floats per VBO: Pos (3) XYZ, and Color (4) RGBA
-  uint32_t vboSize = static_cast<uint32_t>(mesh->num_faces() * sizeof(float) * 7);
+  // plus 4 more floats for trajectory density project - Radius (1), Tangent (3)
+  uint32_t vboSize = static_cast<uint32_t>(mesh->num_faces() * sizeof(float) * 11);
 
   // Construct VBO and IBO that will be used to render the faces. Once again,
   // IBOs are not strictly needed. But, we may be able to optimize this code
@@ -715,9 +716,6 @@ void GeometryBuilder::renderFacesLinear(
   std::string shader = "Shaders/TrajectoryDensityProjection";
   std::vector<SpireVBO::AttributeData> attribs;
   attribs.push_back(SpireVBO::AttributeData("aPos", 3 * sizeof(float)));
-  attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
-  attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
-  attribs.push_back(SpireVBO::AttributeData("aColor", sizeof(int)));
   std::vector<SpireSubPass::Uniform> uniforms;
 
 #if 0
@@ -837,6 +835,11 @@ void GeometryBuilder::renderFacesLinear(
   }
 #endif
 
+  // vertex attributes for trajectory density projection...
+  attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
+  attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
+//  attribs.push_back(SpireVBO::AttributeData("aColor", sizeof(int)));
+
   SpireVBO geomVBO(vboName, attribs, vboBufferSPtr,
     numVBOElements, mesh->get_bounding_box(), true);
 
@@ -900,6 +903,19 @@ void GeometryBuilder::addFaceGeom(
     vboBuffer->write(static_cast<float>(1.f));
   };
 
+  // additions for trajectory density projection attributes
+  auto writeVBORadius = [&vboBuffer](float radius)
+  {
+    vboBuffer->write(static_cast<float>(radius);
+  };
+
+  auto writeVBOTangent = [&vboBuffer](const Vector& tangent)
+  {
+    vboBuffer->write(static_cast<float>(tangent.x());
+    vboBuffer->write(static_cast<float>(tangent.y());
+    vboBuffer->write(static_cast<float>(tangent.z());
+  };
+
   auto writeIBOIndex = [&iboBuffer](uint32_t index)
   {
     iboBuffer->write(index);
@@ -951,25 +967,55 @@ void GeometryBuilder::addFaceGeom(
           // Render points if we are not rendering spheres.
           writeVBOPoint(points[0]);
           writeVBONormal(normals[0]);
+          writeVBORadius(points[0].get_radius());
+          Vector tangent(points[0].get_tangent_x()
+                        , points[0].get_tangent_y()
+                        , points[0].get_tangent_z());
+          writeVBOTangent(tangent);
           writeIBOIndex(iboIndex);
 
           writeVBOPoint(points[i - 1]);
           writeVBONormal(normals[i - 1]);
+          writeVBORadius(points[i - 1].get_radius());
+          Vector tangent(points[i - 1].get_tangent_x()
+                        , points[i - 1].get_tangent_y()
+                        , points[i - 1].get_tangent_z());
+          writeVBOTangent(tangent);
           writeIBOIndex(iboIndex + i - 1);
 
           writeVBOPoint(points[i]);
           writeVBONormal(normals[i]);
+          writeVBORadius(points[i].get_radius());
+          Vector tangent(points[i].get_tangent_x()
+                        , points[i].get_tangent_y()
+                        , points[i].get_tangent_z());
+          writeVBOTangent(tangent);
           writeIBOIndex(iboIndex + i);
         }
         else
         {
           writeVBOPoint(points[0]);
+          writeVBORadius(points[0].get_radius());
+          Vector tangent(points[0].get_tangent_x()
+                        , points[0].get_tangent_y()
+                        , points[0].get_tangent_z());
+          writeVBOTangent(tangent);
           writeIBOIndex(iboIndex);
 
           writeVBOPoint(points[i - 1]);
+          writeVBORadius(points[i - 1].get_radius());
+          Vector tangent(points[i - 1].get_tangent_x()
+                        , points[i - 1].get_tangent_y()
+                        , points[i - 1].get_tangent_z());
+          writeVBOTangent(tangent);
           writeIBOIndex(iboIndex + i - 1);
 
           writeVBOPoint(points[i]);
+          writeVBORadius(points[i].get_radius());
+          Vector tangent(points[i].get_tangent_x()
+                        , points[i].get_tangent_y()
+                        , points[i].get_tangent_z());
+          writeVBOTangent(tangent);
           writeIBOIndex(iboIndex + i);
         }
       }
