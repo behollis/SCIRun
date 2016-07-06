@@ -33,18 +33,45 @@ uniform mat4    uInverseView;       // world -> view
 
 // Attributes
 attribute vec3  aPos;
+attribute float aRadius;
+attribute vec3 aTangent;
+
 
 // Outputs to the fragment shader.
 varying vec4    fColor;
 varying vec4    vPos;//for clipping plane calc
 varying vec4    vFogCoord;// for fog calculation
+varying float expansion_dir;
+varying float fall_off;
 
 void main( void )
 {
-  gl_Position = uProjIVObject * vec4(aPos, 1.0);
-  fColor      = uColor;
+  vec4 tangent = vec4(aTangent.xyz, 0.0);
+  expansion_dir = aRadius;
+  
+  // instead of what Kuhn does, just take gl_Vertex in View space. 
+  vec4 viewsp_vtx_pos = uInverseView * vec4(aPos.xyz, 0.0);
+  vec4 viewsp_tangent = uInverseView * tangent; 
+  
+  // additive inverse of viewspace vtx pos is vector pointing 
+  // to camera from vertex in view space 
+  vec3 viewsp_vtx_pos3 = vec3(viewsp_vtx_pos.xyz);
+  vec3 viewsp_offset_dir = cross(vec3(viewsp_tangent.xyz), -viewsp_vtx_pos3); 
+  vec3 viewsp_offset_dir_norm = normalize( viewsp_offset_dir );
+  
+  float offset_scale = 0.1; 
+  vec4 new_viewsp_vtx_pos = vec4((viewsp_offset_dir_norm * offset_scale * expansion_dir) 
+   + viewsp_vtx_pos3, 1); 
+//  mat4 projMatrix = MCDCMatrix * inverse(MCVCMatrix); //here we obtain the projection matrix 
+  gl_Position = gl_ProjectionMatrix * new_viewsp_vtx_pos; 
+//  gl_Position = uProjIVObject * vec4( aPos, 1.0 );
+
+//  gl_Position = uProjIVObject * vec4(aPos, 1.0);
+  fColor      = vec4(0.0, 1.0, 0.0, 1.0); //uColor;
   vPos = vec4(aPos, 1.0);
   vFogCoord = uInverseView * vPos;
+  
+  fall_off = 1.0;
 }
 
 /*

@@ -105,7 +105,7 @@ void main()
       discard;
   }
 
-  gl_FragColor    = vec4(1, 0, 0, 1);//vec4(fColor.xyz,uTransparency);
+  gl_FragColor    = vec4(fColor.xyz,uTransparency);
 
   //calculate fog
   if (uFogSettings.x > 0.0)
