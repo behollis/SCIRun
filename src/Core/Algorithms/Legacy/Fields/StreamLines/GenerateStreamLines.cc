@@ -274,8 +274,11 @@ GenerateStreamLinesAlgoP::runImpl()
 
       if (node_iter != BI.nodes_.end())
       {
-        p1 = *node_iter;
-        Point p2(p1);
+//        p1 = *node_iter;
+//        Point p2(p1);
+        Point p1(0, 0, 0);
+        Point p2(0, 1, 0);
+
 
         // find tangent approx.
 //        Vector tangent( *( node_iter + 1 ) - p1 );
@@ -337,11 +340,22 @@ GenerateStreamLinesAlgoP::runImpl()
 
         double ptx = tx, pty = ty , ptz = tz;
 
+        int idx2 = 0;
         while (node_iter != BI.nodes_.end())
         {
-          Point p3 = *node_iter;
+          if (idx2 >= 1)
+            break;
+
+//          Point p3 = *node_iter;
           // Adding quad instead of point here...
-          Point p4(p3);
+//          Point p4(p3);
+
+          Point p3(1, 1, 0);
+          Point p4(1, 0, 0);
+
+          idx++;
+
+
 
           ofield_->resize_values();
 
