@@ -297,22 +297,22 @@ GenerateStreamLinesAlgoP::runImpl()
         // 1. expansion radius
         // 2. tangent approx; 3 doubles
         // 3. color indx lookup
-        p1.addradius(-1.0);
+        p1.setradius(-1.0);
 //        p1.add_vertex_attrib(tangent.x());
 //        p1.add_vertex_attrib(tangent.y());
 //        p1.add_vertex_attrib(tangent.z());
-        p1.addtx(tx);
-        p1.addty(ty);
-        p1.addtz(tz);
+        p1.settx(tx);
+        p1.setty(ty);
+        p1.settz(tz);
 //        p1.add_vertex_attrib(0.0);
 
-        p2.addradius(1.0);
+        p2.setradius(1.0);
 //        p1.add_vertex_attrib(tangent.x());
 //        p1.add_vertex_attrib(tangent.y());
 //        p1.add_vertex_attrib(tangent.z());
-        p2.addtx(tx);
-        p2.addty(ty);
-        p2.addtz(tz);
+        p2.settx(tx);
+        p2.setty(ty);
+        p2.settz(tz);
 //        p2.add_vertex_attrib(0.0);
 
         n1 = omesh_->add_point(p1);
@@ -340,11 +340,8 @@ GenerateStreamLinesAlgoP::runImpl()
         while (node_iter != BI.nodes_.end())
         {
           Point p3 = *node_iter;
-          n3 = omesh_->add_point(p3);
-
           // Adding quad instead of point here...
           Point p4(p3);
-          n4 = omesh_->add_point(p4);
 
           ofield_->resize_values();
 
@@ -403,25 +400,28 @@ GenerateStreamLinesAlgoP::runImpl()
           // 1. expansion radius
           // 2. tangent approx; 3 doubles
           // 3. color indx lookup
-          p3.addradius(-1.0);
+          p3.setradius(-1.0);
 //          p3.add_vertex_attrib(tangent->x());
 //          p3.add_vertex_attrib(tangent->y());
 //          p3.add_vertex_attrib(tangent->z());
-          p3.addtx(tx);
-          p3.addty(ty);
-          p3.addtz(tz);
+          p3.settx(tx);
+          p3.setty(ty);
+          p3.settz(tz);
 //          p3.add_vertex_attrib(0.0);
 
-          p4.addradius(1.0);
+          p4.setradius(1.0);
 //          p4.add_vertex_attrib(tangent->x());
 //          p4.add_vertex_attrib(tangent->y());
 //          p4.add_vertex_attrib(tangent->z());
-          p4.addtx(tx);
-          p4.addty(ty);
-          p4.addtz(tz);
+          p4.settx(tx);
+          p4.setty(ty);
+          p4.settz(tz);
 //          p4.add_vertex_attrib(0.0);
 
 //          delete tangent;
+
+          n3 = omesh_->add_point(p3);
+          n4 = omesh_->add_point(p4);
 
           newnodes2[0] = n1;
           newnodes2[1] = n2;

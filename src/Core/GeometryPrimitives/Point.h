@@ -49,12 +49,13 @@ namespace Geometry {
 class Point 
 {
 private:
-  double d_[3];
   // vertex attributes, used for rendering
-  double radius;
-  double tx;
-  double ty;
-  double tz;
+  double radius_;
+  double tx_;
+  double ty_;
+  double tz_;
+  double d_[3];
+
 public:
   inline explicit Point(const Vector& v);
   inline Point(double x, double y, double z)
@@ -79,14 +80,14 @@ public:
   inline double& operator()(int idx);
   inline double operator()(int idx) const;
   inline void addscaled(const Point& p, const double scale);  // this += p * w;
-  inline void addradius(const double attr) { radius = attr; }
-  inline void addtx(const double attr) { tx = attr; }
-  inline void addty(const double attr) { ty = attr; }
-  inline void addtz(const double attr) { tz = attr; }
-  inline double get_radius() const { return radius; }
-  inline double get_tangent_x() const { return tx; }
-  inline double get_tangent_y() const { return ty; }
-  inline double get_tangent_z() const { return tz; }
+  inline void setradius(const double attr); //{ radius_ = attr; }
+  inline void settx(const double attr); //{ tx_ = attr; }
+  inline void setty(const double attr); //{ ty_ = attr; }
+  inline void settz(const double attr); //{ tz_ = attr; }
+  inline double radius() const;
+  inline double tx() const;
+  inline double ty() const;
+  inline double tz() const;
   inline void x(const double);
   inline double x() const;
   inline void y(const double);
@@ -118,6 +119,11 @@ inline Point::Point(const Point& p)
   d_[0] = p.d_[0];
   d_[1] = p.d_[1]; 
   d_[2] = p.d_[2];
+
+  radius_ = p.radius_;
+  tx_ = p.tx_;
+  ty_ = p.ty_;
+  tz_ = p.tz_;
 }
 
 inline Point::Point()
@@ -125,6 +131,11 @@ inline Point::Point()
   d_[0] = 0.0;
   d_[1] = 0.0;
   d_[2] = 0.0;
+
+  radius_ = 0.0;
+  tx_ = 0.0;
+  ty_ = 0.0;
+  tz_ = 0.0;
 }
 
 inline Point& Point::operator=(const Point& p)
@@ -132,7 +143,38 @@ inline Point& Point::operator=(const Point& p)
   d_[0] = p.d_[0];
   d_[1] = p.d_[1]; 
   d_[2] = p.d_[2];
+
+  radius_ = p.radius_;
+  tx_ = p.tx_;
+  ty_ = p.ty_;
+  tz_ = p.tz_;
+
   return *this;
+}
+
+inline void Point::setradius(const double attr) { radius_ = attr; }
+inline void Point::settx(const double attr) { tx_ = attr; }
+inline void Point::setty(const double attr) { ty_ = attr; }
+inline void Point::settz(const double attr) { tz_ = attr; }
+
+inline double Point::radius() const
+{
+  return radius_;
+}
+
+inline double Point::tx() const
+{
+  return tx_;
+}
+
+inline double Point::ty() const
+{
+  return ty_;
+}
+
+inline double Point::tz() const
+{
+  return tz_;
 }
 
 inline void Point::x(const double d)

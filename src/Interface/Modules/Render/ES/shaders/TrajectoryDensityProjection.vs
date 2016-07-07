@@ -59,7 +59,7 @@ void main( void )
   vec3 viewsp_offset_dir = cross(vec3(viewsp_tangent.xyz), -viewsp_vtx_pos3); 
   vec3 viewsp_offset_dir_norm = normalize( viewsp_offset_dir );
   
-  float offset_scale = 0.5; 
+  float offset_scale = 0.05; 
   vec4 new_viewsp_vtx_pos = vec4((viewsp_offset_dir_norm * offset_scale * expansion_dir) 
    + viewsp_vtx_pos3, 1); 
 
