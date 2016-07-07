@@ -277,22 +277,43 @@ GenerateStreamLinesAlgoP::runImpl()
         p1 = *node_iter;
         Point p2(p1);
 
-        Vector tangent( *( node_iter + 1 ) - p1 );
+        // find tangent approx.
+//        Vector tangent( *( node_iter + 1 ) - p1 );
+        int idx = 1;
+        Point next = *( node_iter + idx );
+        while ( std::abs( next.x() - p1.x() ) < 0.00001 ) {
+          next = *( node_iter + idx++);
+        }
+
+        double tx = next.x() - p1.x();
+        double ty = next.y() - p1.y();
+        double tz = next.z() - p1.z();
+
+        // debug test output
+        std::cout << tx << std::endl;
+        std::cout << ty << std::endl;
+        std::cout << tz << std::endl << std::endl;
 
         // 1. expansion radius
         // 2. tangent approx; 3 doubles
         // 3. color indx lookup
-        p1.add_vertex_attrib(-1.0);
-        p1.add_vertex_attrib(tangent[0]);
-        p1.add_vertex_attrib(tangent[1]);
-        p1.add_vertex_attrib(tangent[2]);
-        p1.add_vertex_attrib(0.0);
+        p1.addradius(-1.0);
+//        p1.add_vertex_attrib(tangent.x());
+//        p1.add_vertex_attrib(tangent.y());
+//        p1.add_vertex_attrib(tangent.z());
+        p1.addtx(tx);
+        p1.addty(ty);
+        p1.addtz(tz);
+//        p1.add_vertex_attrib(0.0);
 
-        p2.add_vertex_attrib(+1.0);
-        p1.add_vertex_attrib(tangent[0]);
-        p1.add_vertex_attrib(tangent[1]);
-        p1.add_vertex_attrib(tangent[2]);
-        p1.add_vertex_attrib(0.0);
+        p2.addradius(1.0);
+//        p1.add_vertex_attrib(tangent.x());
+//        p1.add_vertex_attrib(tangent.y());
+//        p1.add_vertex_attrib(tangent.z());
+        p2.addtx(tx);
+        p2.addty(ty);
+        p2.addtz(tz);
+//        p2.add_vertex_attrib(0.0);
 
         n1 = omesh_->add_point(p1);
         n2 = omesh_->add_point(p2);
@@ -313,6 +334,8 @@ GenerateStreamLinesAlgoP::runImpl()
         ++node_iter;
 
         cc++;
+
+        double ptx = tx, pty = ty , ptz = tz;
 
         while (node_iter != BI.nodes_.end())
         {
@@ -343,31 +366,62 @@ GenerateStreamLinesAlgoP::runImpl()
             ofield_->set_value(length,n3);
           }
 
-          Vector* tangent;
-          Point prev = *( node_iter - 1 );
+///          Vector* tangent;
+          int idx = 1;
+          Point prev = *( node_iter - idx );
+          while ( std::abs( prev.x() - p3.x() ) < 0.00001
+                && (node_iter - idx) != BI.nodes_.begin()) {
+            prev = *( node_iter - idx++);
+          }
+
+          double tx, ty, tz;
           if ( node_iter + 1 != BI.nodes_.end() ) {
-            tangent = new Vector( *( node_iter + 1 ) - prev );
+//            tangent = new Vector( *( node_iter + 1 ) - prev );
+            tx = ( node_iter + 1 )->x() - prev.x();
+            ty = ( node_iter + 1 )->y() - prev.y();
+            tz = ( node_iter + 1 )->z() - prev.z();
           } else {
             // this is the last point in the sline
-            tangent = new Vector( *node_iter - prev );
+//            tangent = new Vector( *node_iter - prev );
+            tx = node_iter->x() - prev.x();
+            ty = node_iter->y() - prev.y();
+            tz = node_iter->z() - prev.z();
           }
+
+          if ( tx == 0.0 && ty == 0.0 && tz == 0.0 ) {
+            tx = ptx;
+            ty = pty;
+            tz = ptz;
+          }
+
+          // debug test output; some tangents equal zero;
+          // need to fix or shader will fail
+          std::cout << tx << std::endl;
+          std::cout << ty << std::endl;
+          std::cout << tz << std::endl << std::endl;
 
           // 1. expansion radius
           // 2. tangent approx; 3 doubles
           // 3. color indx lookup
-          p3.add_vertex_attrib(-1.0);
-          p3.add_vertex_attrib((*tangent)[0]);
-          p3.add_vertex_attrib((*tangent)[1]);
-          p3.add_vertex_attrib((*tangent)[2]);
-          p3.add_vertex_attrib(0.0);
+          p3.addradius(-1.0);
+//          p3.add_vertex_attrib(tangent->x());
+//          p3.add_vertex_attrib(tangent->y());
+//          p3.add_vertex_attrib(tangent->z());
+          p3.addtx(tx);
+          p3.addty(ty);
+          p3.addtz(tz);
+//          p3.add_vertex_attrib(0.0);
 
-          p4.add_vertex_attrib(+1.0);
-          p4.add_vertex_attrib((*tangent)[0]);
-          p4.add_vertex_attrib((*tangent)[1]);
-          p4.add_vertex_attrib((*tangent)[2]);
-          p4.add_vertex_attrib(0.0);
+          p4.addradius(1.0);
+//          p4.add_vertex_attrib(tangent->x());
+//          p4.add_vertex_attrib(tangent->y());
+//          p4.add_vertex_attrib(tangent->z());
+          p4.addtx(tx);
+          p4.addty(ty);
+          p4.addtz(tz);
+//          p4.add_vertex_attrib(0.0);
 
-          delete tangent;
+//          delete tangent;
 
           newnodes2[0] = n1;
           newnodes2[1] = n2;
@@ -382,6 +436,10 @@ GenerateStreamLinesAlgoP::runImpl()
           n1 = n3;
           n2 = n4;
           ++node_iter;
+
+          ptx = tx;
+          pty = ty;
+          ptz = tz;
 
           cc++;
         }

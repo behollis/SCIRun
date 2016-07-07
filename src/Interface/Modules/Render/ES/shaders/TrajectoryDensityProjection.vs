@@ -59,12 +59,13 @@ void main( void )
   vec3 viewsp_offset_dir = cross(vec3(viewsp_tangent.xyz), -viewsp_vtx_pos3); 
   vec3 viewsp_offset_dir_norm = normalize( viewsp_offset_dir );
   
-  float offset_scale = 0.1; 
+  float offset_scale = 0.5; 
   vec4 new_viewsp_vtx_pos = vec4((viewsp_offset_dir_norm * offset_scale * expansion_dir) 
    + viewsp_vtx_pos3, 1); 
+
 //  mat4 projMatrix = MCDCMatrix * inverse(MCVCMatrix); //here we obtain the projection matrix 
-  gl_Position = gl_ProjectionMatrix * new_viewsp_vtx_pos; 
-//  gl_Position = uProjIVObject * vec4( aPos, 1.0 );
+  mat4 projMatrix = uProjIVObject * inverse(uInverseView); //here we obtain the projection matrix 
+  gl_Position = projMatrix * new_viewsp_vtx_pos; 
 
 //  gl_Position = uProjIVObject * vec4(aPos, 1.0);
   fColor      = vec4(0.0, 1.0, 0.0, 1.0); //uColor;

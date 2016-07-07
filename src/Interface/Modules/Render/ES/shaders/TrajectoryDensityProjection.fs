@@ -58,6 +58,8 @@ uniform vec4    uFogColor;          // fog color
 varying vec4  fColor;
 varying vec4    vPos;//for clipping plane calc
 varying vec4    vFogCoord;// for fog calculation
+varying float expansion_dir;
+varying float fall_off;
 
 void main()
 {

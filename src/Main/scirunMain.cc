@@ -152,7 +152,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 int main(int argc, const char* argv[], char **environment)
 {
-  return mainImpl(argc, argv, environment);
+   return mainImpl(argc, argv, environment);
 }
 
 #endif // End of main for non-Windows.
