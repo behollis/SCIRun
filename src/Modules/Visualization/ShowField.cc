@@ -422,6 +422,8 @@ void GeometryBuilder::renderFacesLinear(
 
   mesh->size(numFaces);
 
+  std::cout << "number of faces" << numFaces << std::endl;
+
   if (numFaces == 0)
     return;
 
@@ -453,6 +455,8 @@ void GeometryBuilder::renderFacesLinear(
   //Seven floats per VBO: Pos (3) XYZ, and Color (4) RGBA
   // plus 4 more floats for trajectory density project - Radius (1), Tangent (3)
   uint32_t vboSize = static_cast<uint32_t>(mesh->num_faces() * sizeof(float) * 11);
+
+  std::cout << "Number of faces: " << mesh->num_faces() << std::endl;
 
   // Construct VBO and IBO that will be used to render the faces. Once again,
   // IBOs are not strictly needed. But, we may be able to optimize this code
@@ -890,6 +894,7 @@ void GeometryBuilder::addFaceGeom(
 
   auto writeVBONormal = [&vboBuffer](const Vector& normal)
   {
+    return;
     vboBuffer->write(static_cast<float>(normal.x()));
     vboBuffer->write(static_cast<float>(normal.y()));
     vboBuffer->write(static_cast<float>(normal.z()));
@@ -897,6 +902,7 @@ void GeometryBuilder::addFaceGeom(
 
   auto writeVBOColorValue = [&vboBuffer](ColorRGB value)
   {
+    return;
     vboBuffer->write(static_cast<float>(value.r()));
     vboBuffer->write(static_cast<float>(value.g()));
     vboBuffer->write(static_cast<float>(value.b()));
@@ -906,11 +912,13 @@ void GeometryBuilder::addFaceGeom(
   // additions for trajectory density projection attributes
   auto writeVBORadius = [&vboBuffer](float radius)
   {
+    return;
     vboBuffer->write( static_cast<float>(radius) );
   };
 
   auto writeVBOTangent = [&vboBuffer](const Vector& tangent)
   {
+    return;
     vboBuffer->write( static_cast<float>(tangent.x()) );
     vboBuffer->write( static_cast<float>(tangent.y()) );
     vboBuffer->write( static_cast<float>(tangent.z()) );
@@ -922,6 +930,8 @@ void GeometryBuilder::addFaceGeom(
   };
 
   bool doubleSided = state.get(RenderState::IS_DOUBLE_SIDED);
+
+  std::cout << "adding another face" << std::endl;
 
   if (colorScheme == ColorScheme::COLOR_UNIFORM)
   {
@@ -965,7 +975,8 @@ void GeometryBuilder::addFaceGeom(
         std::cout << points[2].radius() << std::endl;
         std::cout << points[2].tx() << std::endl << std::endl;
 
-        writeVBOPoint(points[3]);
+
+//        writeVBOPoint(points[3]);
         writeVBONormal(normals[3]);
         writeVBORadius(points[3].radius());
         Vector tangent3(points[3].tx()
@@ -1002,6 +1013,7 @@ void GeometryBuilder::addFaceGeom(
                        , points[3].ty()
                        , points[3].tz());
         writeVBOTangent(tangent3);
+
       }
       writeIBOIndex(iboIndex);
       writeIBOIndex(iboIndex + 1);
@@ -1013,6 +1025,7 @@ void GeometryBuilder::addFaceGeom(
 
       iboIndex += 4;
     }
+/*
     else
     {
       for (size_t i = 2; i < points.size(); i++)
@@ -1285,6 +1298,7 @@ void GeometryBuilder::addFaceGeom(
       }
       iboIndex += points.size();
     }
+*/
   }
 }
 

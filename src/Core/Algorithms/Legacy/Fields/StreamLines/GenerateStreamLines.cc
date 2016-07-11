@@ -196,7 +196,7 @@ GenerateStreamLinesAlgoP::runImpl()
   // first candidate for module/algo stopping.
   try
   {
-    VMesh::Node::index_type n1, n2, n3, n4; // Adding quad instead of point.
+    VMesh::Node::index_type n1, n2, n3, n3cp, n4; // Adding quad instead of point.
     Vector test;
 
     StreamLineIntegrators BI;
@@ -210,6 +210,9 @@ GenerateStreamLinesAlgoP::runImpl()
     VMesh::size_type num_seeds = seed_mesh_->num_nodes();
     VMesh::Node::array_type newnodes(2);
     VMesh::Node::array_type newnodes2(4); // Adding quad instead of point.
+
+    VMesh::Node::array_type newnodes_tri1(3);
+    VMesh::Node::array_type newnodes_tri2(3);
 //    omesh_->dimension_ = 3;
 
     for (VMesh::Node::index_type idx=1; idx<num_seeds; ++idx)
@@ -351,7 +354,9 @@ GenerateStreamLinesAlgoP::runImpl()
 //          Point p4(p3);
 
           Point p3(1, 1, 0);
+//          Point p3cp(p3);
           Point p4(1, 0, 0);
+//          Point p4(p1);
 
           idx++;
 
@@ -435,17 +440,31 @@ GenerateStreamLinesAlgoP::runImpl()
 //          delete tangent;
 
           n3 = omesh_->add_point(p3);
+//          n3cp = omesh_->add_point(p3cp);
           n4 = omesh_->add_point(p4);
+
 
           newnodes2[0] = n1;
           newnodes2[1] = n2;
           newnodes2[2] = n3;
           newnodes2[3] = n4;
 
+
 //          newnodes[0] = n1;
 //          newnodes[1] = n3;
 
+//          newnodes_tri1[0] = n1;
+//          newnodes_tri1[1] = n2;
+//          newnodes_tri1[2] = n3;
+
+//          newnodes_tri2[0] = n3cp;
+//          newnodes_tri2[1] = n4;
+//          newnodes_tri2[2] = n1;
+
+
           omesh_->add_elem(newnodes2);
+//          omesh_->add_elem(newnodes_tri1);
+//          omesh_->add_elem(newnodes_tri2);
 
           n1 = n3;
           n2 = n4;
