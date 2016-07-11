@@ -196,7 +196,7 @@ GenerateStreamLinesAlgoP::runImpl()
   // first candidate for module/algo stopping.
   try
   {
-    VMesh::Node::index_type n1, n2, n3, n3cp, n4; // Adding quad instead of point.
+    VMesh::Node::index_type n1, n2, n3, n4; // Adding quad instead of point.
     Vector test;
 
     StreamLineIntegrators BI;
@@ -210,10 +210,6 @@ GenerateStreamLinesAlgoP::runImpl()
     VMesh::size_type num_seeds = seed_mesh_->num_nodes();
     VMesh::Node::array_type newnodes(2);
     VMesh::Node::array_type newnodes2(4); // Adding quad instead of point.
-
-    VMesh::Node::array_type newnodes_tri1(3);
-    VMesh::Node::array_type newnodes_tri2(3);
-//    omesh_->dimension_ = 3;
 
     for (VMesh::Node::index_type idx=1; idx<num_seeds; ++idx)
     {
@@ -277,11 +273,8 @@ GenerateStreamLinesAlgoP::runImpl()
 
       if (node_iter != BI.nodes_.end())
       {
-//        p1 = *node_iter;
-//        Point p2(p1);
-        Point p1(0, 0, 0);
-        Point p2(0, 1, 0);
-
+        p1 = *node_iter;
+        Point p2(p1);
 
         // find tangent approx.
 //        Vector tangent( *( node_iter + 1 ) - p1 );
@@ -304,22 +297,14 @@ GenerateStreamLinesAlgoP::runImpl()
         // 2. tangent approx; 3 doubles
         // 3. color indx lookup
         p1.setradius(-1.0);
-//        p1.add_vertex_attrib(tangent.x());
-//        p1.add_vertex_attrib(tangent.y());
-//        p1.add_vertex_attrib(tangent.z());
         p1.settx(tx);
         p1.setty(ty);
         p1.settz(tz);
-//        p1.add_vertex_attrib(0.0);
 
         p2.setradius(1.0);
-//        p1.add_vertex_attrib(tangent.x());
-//        p1.add_vertex_attrib(tangent.y());
-//        p1.add_vertex_attrib(tangent.z());
         p2.settx(tx);
         p2.setty(ty);
         p2.settz(tz);
-//        p2.add_vertex_attrib(0.0);
 
         n1 = omesh_->add_point(p1);
         n2 = omesh_->add_point(p2);
@@ -343,24 +328,12 @@ GenerateStreamLinesAlgoP::runImpl()
 
         double ptx = tx, pty = ty , ptz = tz;
 
-        int idx2 = 0;
         while (node_iter != BI.nodes_.end())
         {
-          if (idx2 >= 1)
-            break;
 
-//          Point p3 = *node_iter;
+          Point p3 = *node_iter;
           // Adding quad instead of point here...
-//          Point p4(p3);
-
-          Point p3(1, 1, 0);
-//          Point p3cp(p3);
-          Point p4(1, 0, 0);
-//          Point p4(p1);
-
-          idx++;
-
-
+          Point p4(p3);
 
           ofield_->resize_values();
 
@@ -382,7 +355,6 @@ GenerateStreamLinesAlgoP::runImpl()
             ofield_->set_value(length,n3);
           }
 
-///          Vector* tangent;
           int idx = 1;
           Point prev = *( node_iter - idx );
           while ( std::abs( prev.x() - p3.x() ) < 0.00001
@@ -392,13 +364,11 @@ GenerateStreamLinesAlgoP::runImpl()
 
           double tx, ty, tz;
           if ( node_iter + 1 != BI.nodes_.end() ) {
-//            tangent = new Vector( *( node_iter + 1 ) - prev );
             tx = ( node_iter + 1 )->x() - prev.x();
             ty = ( node_iter + 1 )->y() - prev.y();
             tz = ( node_iter + 1 )->z() - prev.z();
           } else {
             // this is the last point in the sline
-//            tangent = new Vector( *node_iter - prev );
             tx = node_iter->x() - prev.x();
             ty = node_iter->y() - prev.y();
             tz = node_iter->z() - prev.z();
@@ -420,51 +390,24 @@ GenerateStreamLinesAlgoP::runImpl()
           // 2. tangent approx; 3 doubles
           // 3. color indx lookup
           p3.setradius(-1.0);
-//          p3.add_vertex_attrib(tangent->x());
-//          p3.add_vertex_attrib(tangent->y());
-//          p3.add_vertex_attrib(tangent->z());
           p3.settx(tx);
           p3.setty(ty);
           p3.settz(tz);
-//          p3.add_vertex_attrib(0.0);
 
           p4.setradius(1.0);
-//          p4.add_vertex_attrib(tangent->x());
-//          p4.add_vertex_attrib(tangent->y());
-//          p4.add_vertex_attrib(tangent->z());
           p4.settx(tx);
           p4.setty(ty);
           p4.settz(tz);
-//          p4.add_vertex_attrib(0.0);
-
-//          delete tangent;
 
           n3 = omesh_->add_point(p3);
-//          n3cp = omesh_->add_point(p3cp);
           n4 = omesh_->add_point(p4);
-
 
           newnodes2[0] = n1;
           newnodes2[1] = n2;
           newnodes2[2] = n3;
           newnodes2[3] = n4;
 
-
-//          newnodes[0] = n1;
-//          newnodes[1] = n3;
-
-//          newnodes_tri1[0] = n1;
-//          newnodes_tri1[1] = n2;
-//          newnodes_tri1[2] = n3;
-
-//          newnodes_tri2[0] = n3cp;
-//          newnodes_tri2[1] = n4;
-//          newnodes_tri2[2] = n1;
-
-
           omesh_->add_elem(newnodes2);
-//          omesh_->add_elem(newnodes_tri1);
-//          omesh_->add_elem(newnodes_tri2);
 
           n1 = n3;
           n2 = n4;
