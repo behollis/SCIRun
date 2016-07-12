@@ -46,12 +46,12 @@ varying float fall_off;
 
 void main( void )
 {
-/*
-  vec4 tangent = vec4(aTangent.xyz, 0.0);
+
+  vec4 tangent = vec4(aTangent.xyz, 1.0);
   expansion_dir = aRadius;
   
   // instead of what Kuhn does, just take gl_Vertex in View space. 
-  vec4 viewsp_vtx_pos = uInverseView * vec4(aPos.xyz, 0.0);
+  vec4 viewsp_vtx_pos = uInverseView * vec4(aPos.xyz, 1.0);
   vec4 viewsp_tangent = uInverseView * tangent; 
   
   // additive inverse of viewspace vtx pos is vector pointing 
@@ -60,33 +60,31 @@ void main( void )
   vec3 viewsp_offset_dir = cross(vec3(viewsp_tangent.xyz), -viewsp_vtx_pos3); 
   vec3 viewsp_offset_dir_norm = normalize( viewsp_offset_dir );
   
-  float offset_scale = 0.0001; 
+  float offset_scale = 0.001; 
   vec4 new_viewsp_vtx_pos = vec4((viewsp_offset_dir_norm * offset_scale * expansion_dir) 
    + viewsp_vtx_pos3, 1.0); 
 
 //  mat4 projMatrix = MCDCMatrix * inverse(MCVCMatrix); //here we obtain the projection matrix 
   mat4 projMatrix = uProjIVObject * inverse(uInverseView); //here we obtain the projection matrix 
-//  gl_Position = projMatrix * new_viewsp_vtx_pos;
-  
+
+  gl_Position = projMatrix * new_viewsp_vtx_pos;  
   vPos = vec4(aPos, 1.0);
   vFogCoord = uInverseView * vPos;
-
-  vec3 down = vec3(0,0,-0.01);
-  vec3 mdown = vec3(down + aPos);
-  gl_Position = uProjIVObject * vec4( mdown.xyz, 1.0);
+  fColor = vec4(1,0,0,1);//uColor;
 
 //  gl_Position = uProjIVObject * vec4(aPos, 1.0);
 
-  if (aRadius > 0.0) {
-    vec3 up = vec3(0,0,0.01);
-    vec3 mup = vec3(up + aPos);
-    gl_Position = uProjIVObject * vec4(vec3(mup.xyz), 1.0);
-  }
-*/
+//  if (aRadius > 0.0) {
+//    vec3 up = vec3(0,0,0.01);
+//    vec3 mup = vec3(up + aPos);
+//    gl_Position = uProjIVObject * vec4(vec3(mup.xyz), 1.0);
+//  }
+
+/*
   gl_Position = uProjIVObject * vec4(aPos, 1.0); 
-  fColor = vec4(1,0,0,1);//uColor;
   vPos = vec4(aPos, 1.0);
   vFogCoord = uInverseView * vPos;
+*/
   
   fall_off = 1.0;
 }

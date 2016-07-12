@@ -840,9 +840,11 @@ void GeometryBuilder::renderFacesLinear(
 #endif
 
   // vertex attributes for trajectory density projection...
-//  attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
-//  attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
+  attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
+  attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
 //  attribs.push_back(SpireVBO::AttributeData("aColor", sizeof(int)));
+
+  std::cout << numVBOElements << std::endl;
 
   SpireVBO geomVBO(vboName, attribs, vboBufferSPtr,
     numVBOElements, mesh->get_bounding_box(), true);
@@ -933,18 +935,23 @@ void GeometryBuilder::addFaceGeom(
 
   std::cout << "adding another face" << std::endl;
 
-  if (colorScheme == ColorScheme::COLOR_UNIFORM)
-  {
+//  if (colorScheme == ColorScheme::COLOR_UNIFORM)
+//  {
     if (points.size() == 4)
     {
-      if (withNormals)
-      {
+//      if (withNormals)
+//      {
         writeVBOPoint(points[0]);
         writeVBONormal(normals[0]);
         writeVBORadius( points[0].radius() );
+        float radius = static_cast<float>(points[0].radius());
+        vboBuffer->write( radius );
         Vector tangent0(points[0].tx()
                       , points[0].ty()
                       , points[0].tz());
+        vboBuffer->write( static_cast<float>(tangent0.x()) );
+        vboBuffer->write( static_cast<float>(tangent0.y()) );
+        vboBuffer->write( static_cast<float>(tangent0.z()) );
         writeVBOTangent(tangent0);
 
         // debug
@@ -954,9 +961,14 @@ void GeometryBuilder::addFaceGeom(
         writeVBOPoint(points[1]);
         writeVBONormal(normals[1]);
         writeVBORadius(points[1].radius());
+        radius = static_cast<float>(points[1].radius());
+        vboBuffer->write( radius );
         Vector tangent1(points[1].tx()
                        , points[1].ty()
                        , points[1].tz());
+        vboBuffer->write( static_cast<float>(tangent1.x()) );
+        vboBuffer->write( static_cast<float>(tangent1.y()) );
+        vboBuffer->write( static_cast<float>(tangent1.z()) );
         writeVBOTangent(tangent1);
 
         // debug
@@ -966,9 +978,14 @@ void GeometryBuilder::addFaceGeom(
         writeVBOPoint(points[2]);
         writeVBONormal(normals[2]);
         writeVBORadius(points[2].radius());
+        radius = static_cast<float>(points[2].radius());
+        vboBuffer->write( radius );
         Vector tangent2(points[2].tx()
                        , points[2].ty()
                        , points[2].tz());
+        vboBuffer->write( static_cast<float>(tangent2.x()) );
+        vboBuffer->write( static_cast<float>(tangent2.y()) );
+        vboBuffer->write( static_cast<float>(tangent2.z()) );
         writeVBOTangent(tangent2);
 
         // debug
@@ -976,18 +993,25 @@ void GeometryBuilder::addFaceGeom(
         std::cout << points[2].tx() << std::endl << std::endl;
 
 
-//        writeVBOPoint(points[3]);
+        writeVBOPoint(points[3]);
         writeVBONormal(normals[3]);
         writeVBORadius(points[3].radius());
+        radius = static_cast<float>(points[3].radius());
+        vboBuffer->write( radius );
         Vector tangent3(points[3].tx()
                        , points[3].ty()
                        , points[3].tz());
+        vboBuffer->write( static_cast<float>(tangent3.x()) );
+        vboBuffer->write( static_cast<float>(tangent3.y()) );
+        vboBuffer->write( static_cast<float>(tangent3.z()) );
         writeVBOTangent(tangent3);
-      }
+//      }
+/*
       else
       {
         writeVBOPoint(points[0]);
         writeVBORadius(points[0].radius());
+        vboBuffer->write( static_cast<float>(radius) );
         Vector tangent0(points[0].tx()
                        , points[0].ty()
                        , points[0].tz());
@@ -995,6 +1019,7 @@ void GeometryBuilder::addFaceGeom(
 
         writeVBOPoint(points[1]);
         writeVBORadius(points[1].radius());
+        vboBuffer->write( static_cast<float>(radius) );
         Vector tangent1(points[1].tx()
                        , points[1].ty()
                        , points[1].tz());
@@ -1002,6 +1027,7 @@ void GeometryBuilder::addFaceGeom(
 
         writeVBOPoint(points[2]);
         writeVBORadius(points[2].radius());
+        vboBuffer->write( static_cast<float>(radius) );
         Vector tangent2(points[2].tx()
                        , points[2].ty()
                        , points[2].tz());
@@ -1009,12 +1035,14 @@ void GeometryBuilder::addFaceGeom(
 
         writeVBOPoint(points[3]);
         writeVBORadius(points[3].radius());
+        vboBuffer->write( static_cast<float>(radius) );
         Vector tangent3(points[3].tx()
                        , points[3].ty()
                        , points[3].tz());
         writeVBOTangent(tangent3);
 
       }
+*/
       writeIBOIndex(iboIndex);
       writeIBOIndex(iboIndex + 1);
       writeIBOIndex(iboIndex + 2);
@@ -1299,7 +1327,7 @@ void GeometryBuilder::addFaceGeom(
       iboIndex += points.size();
     }
 */
-  }
+//  }
 }
 
 void GeometryBuilder::renderNodes(
