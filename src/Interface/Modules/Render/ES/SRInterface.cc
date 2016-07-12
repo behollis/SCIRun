@@ -366,10 +366,19 @@ namespace SCIRun {
             primitive = GL_LINES;
             break;
 
+          case SpireIBO::PRIMITIVE::TRIANGLE_STRIP:
+            primitive = GL_TRIANGLE_STRIP;
+            break;
+
+          case SpireIBO::PRIMITIVE::QUADS:
+          primitive = GL_QUADS;
+          break;
+
           case SpireIBO::PRIMITIVE::TRIANGLES:
           default:
             primitive = GL_TRIANGLES;
             break;
+
           }
 
           int numPrimitives = ibo.data->getBufferSize() / ibo.indexSize;

@@ -278,11 +278,13 @@ GenerateStreamLinesAlgoP::runImpl()
 
         // find tangent approx.
 //        Vector tangent( *( node_iter + 1 ) - p1 );
+
         int idx = 1;
         Point next = *( node_iter + idx );
-        while ( std::abs( next.x() - p1.x() ) < 0.00001 ) {
-          next = *( node_iter + idx++);
-        }
+//        while ( std::abs( next.x() - p1.x() ) < 0.00001 ) {
+//          next = *( node_iter + idx++);
+//        }
+
 
         double tx = next.x() - p1.x();
         double ty = next.y() - p1.y();
@@ -357,10 +359,10 @@ GenerateStreamLinesAlgoP::runImpl()
 
           int idx = 1;
           Point prev = *( node_iter - idx );
-          while ( std::abs( prev.x() - p3.x() ) < 0.00001
-                && (node_iter - idx) != BI.nodes_.begin()) {
-            prev = *( node_iter - idx++);
-          }
+//          while ( std::abs( prev.x() - p3.x() ) < 0.00001
+//                && (node_iter - idx) != BI.nodes_.begin()) {
+//            prev = *( node_iter - idx++);
+//          }
 
           double tx, ty, tz;
           if ( node_iter + 1 != BI.nodes_.end() ) {
@@ -374,11 +376,13 @@ GenerateStreamLinesAlgoP::runImpl()
             tz = node_iter->z() - prev.z();
           }
 
+/*
           if ( tx == 0.0 && ty == 0.0 && tz == 0.0 ) {
             tx = ptx;
             ty = pty;
             tz = ptz;
           }
+*/
 
           // debug test output; some tangents equal zero;
           // need to fix or shader will fail
