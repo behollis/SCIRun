@@ -853,7 +853,7 @@ void GeometryBuilder::renderFacesLinear(
 
   // Construct IBO.
 
-  SpireIBO geomIBO(iboName, SpireIBO::PRIMITIVE::TRIANGLE_STRIP, sizeof(uint32_t), iboBufferSPtr);
+  SpireIBO geomIBO(iboName, SpireIBO::PRIMITIVE::TRIANGLES, sizeof(uint32_t), iboBufferSPtr);
 
   geom->mIBOs.push_back(geomIBO);
 

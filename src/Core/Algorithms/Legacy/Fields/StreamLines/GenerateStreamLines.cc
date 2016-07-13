@@ -413,9 +413,9 @@ GenerateStreamLinesAlgoP::runImpl()
 
           omesh_->add_elem(newnodes2);
 
-          Point p3copy(p3);
+//          Point p3copy(p3);
           // Adding quad instead of point here...
-          Point p4copy(p4);
+//          Point p4copy(p4);
 
           std::cout << 'new quad' << std::endl;
           std::cout << n1 << std::endl;
@@ -423,8 +423,8 @@ GenerateStreamLinesAlgoP::runImpl()
           std::cout << n3 << std::endl;
           std::cout << n4 << std::endl;
 
-          n1 = omesh_->add_point(p3copy);//n3;
-          n2 = omesh_->add_point(p4copy);//n4;
+          n1 = n3; //omesh_->add_point(p3copy);//n3;
+          n2 = n4; //omesh_->add_point(p4copy);//n4;
 
           std::cout << n1 << std::endl;
           std::cout << n2 << std::endl;
