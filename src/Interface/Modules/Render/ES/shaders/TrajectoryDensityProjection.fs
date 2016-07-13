@@ -63,6 +63,8 @@ varying float fall_off;
 
 void main()
 {
+  float alpha = pow( 1.0 - abs(expansion_dir), fall_off );
+
   float fPlaneValue;
   if (uClippingPlaneCtrl0.x > 0.5)
   {
@@ -107,11 +109,10 @@ void main()
       discard;
   }
 
-  float alpha = pow( ( 1.0 - abs( expansion_dir ) ), fall_off ); 
+   
 //  gl_FragColor = vec4(color.rgb, alpha);
 
-  vec4 color = vec4(fColor.xyz,alpha);
-  gl_FragColor    = color;//uTransparency);
+  gl_FragColor = vec4(fColor.x,alpha, fColor.z, 1);
 
   //calculate fog
   if (uFogSettings.x > 0.0)

@@ -48,7 +48,6 @@ void main( void )
 {
 
   vec4 tangent = vec4(aTangent.xyz, 1.0);
-  expansion_dir = aRadius;
   
   // instead of what Kuhn does, just take gl_Vertex in View space. 
   vec4 viewsp_vtx_pos = uInverseView * vec4(aPos.xyz, 1.0);
@@ -60,8 +59,8 @@ void main( void )
   vec3 viewsp_offset_dir = cross(vec3(viewsp_tangent.xyz), -viewsp_vtx_pos3); 
   vec3 viewsp_offset_dir_norm = normalize( viewsp_offset_dir );
   
-  float offset_scale = 0.005; 
-  vec4 new_viewsp_vtx_pos = vec4((viewsp_offset_dir_norm * offset_scale * expansion_dir) 
+  float offset_scale = 0.003; 
+  vec4 new_viewsp_vtx_pos = vec4((viewsp_offset_dir_norm * offset_scale * aRadius) 
    + viewsp_vtx_pos3, 1.0); 
 
 //  mat4 projMatrix = MCDCMatrix * inverse(MCVCMatrix); //here we obtain the projection matrix 
@@ -89,8 +88,9 @@ void main( void )
   vPos = vec4(aPos, 1.0);
   vFogCoord = uInverseView * vPos;
 */
-  
-  fall_off = 0.9;
+  fColor = vec4(1,0,0,0.5);
+  fall_off = 0.95;
+  expansion_dir = aRadius;
 }
 
 /*

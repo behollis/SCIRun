@@ -718,7 +718,6 @@ void GeometryBuilder::renderFacesLinear(
 
   // Construct VBO.
   std::string shader = "Shaders/TrajectoryDensityProjection";
-  state.set(RenderState::IS_DOUBLE_SIDED, true);
   std::vector<SpireVBO::AttributeData> attribs;
   attribs.push_back(SpireVBO::AttributeData("aPos", 3 * sizeof(float)));
   std::vector<SpireSubPass::Uniform> uniforms;
@@ -854,12 +853,14 @@ void GeometryBuilder::renderFacesLinear(
 
   // Construct IBO.
 
-  SpireIBO geomIBO(iboName, SpireIBO::PRIMITIVE::QUADS, sizeof(uint32_t), iboBufferSPtr);
+  SpireIBO geomIBO(iboName, SpireIBO::PRIMITIVE::TRIANGLE_STRIP, sizeof(uint32_t), iboBufferSPtr);
 
   geom->mIBOs.push_back(geomIBO);
 
   SpireText text;
 
+  state.set(RenderState::IS_DOUBLE_SIDED, true);
+  state.set(RenderState::USE_TRANSPARENCY, true);
   SpireSubPass pass(passName, vboName, iboName, shader,
     colorScheme, state, RenderType::RENDER_VBO_IBO, geomVBO, geomIBO, text);
 
@@ -1048,9 +1049,9 @@ void GeometryBuilder::addFaceGeom(
       writeIBOIndex(iboIndex + 1);
       writeIBOIndex(iboIndex + 2);
 
-//      writeIBOIndex(iboIndex + 0);
-//      writeIBOIndex(iboIndex + 2);
+      writeIBOIndex(iboIndex + 1);
       writeIBOIndex(iboIndex + 3);
+      writeIBOIndex(iboIndex + 2);
 
       iboIndex += 4;
     }

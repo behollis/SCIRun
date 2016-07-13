@@ -374,6 +374,10 @@ namespace SCIRun {
           primitive = GL_QUADS;
           break;
 
+          case SpireIBO::PRIMITIVE::QUAD_STRIP:
+          primitive = GL_QUAD_STRIP;
+          break;
+
           case SpireIBO::PRIMITIVE::TRIANGLES:
           default:
             primitive = GL_TRIANGLES;
@@ -1521,9 +1525,14 @@ namespace SCIRun {
             bool cullFace = glIsEnabled(GL_CULL_FACE);
             bool blend = glIsEnabled(GL_BLEND);
 
-            GL(glDepthMask(GL_TRUE));
+//            GL(glDepthMask(GL_TRUE));
+            GL(glDepthMask(GL_FALSE));
             GL(glDisable(GL_CULL_FACE));
-            GL(glDisable(GL_BLEND));
+//            GL(glDisable(GL_BLEND));
+            GL(glEnable(GL_BLEND));
+            GL(glDisable(GL_DEPTH_TEST));
+            GL(glBlendEquation(GL_FUNC_ADD));
+            GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
 
             // Note that we can pull aspect ratio from the screen dimensions static
             // variable.
