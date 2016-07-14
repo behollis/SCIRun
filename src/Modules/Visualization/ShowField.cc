@@ -860,6 +860,7 @@ void GeometryBuilder::renderFacesLinear(
   SpireText text;
 
   state.set(RenderState::IS_DOUBLE_SIDED, true);
+  state.set(RenderState::USE_TRAJECTORY_DENSITY_TONE_MAP, true);
   state.set(RenderState::USE_TRANSPARENCY, true);
   SpireSubPass pass(passName, vboName, iboName, shader,
     colorScheme, state, RenderType::RENDER_VBO_IBO, geomVBO, geomIBO, text);

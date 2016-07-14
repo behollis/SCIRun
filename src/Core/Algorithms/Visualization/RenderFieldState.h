@@ -93,7 +93,11 @@ public:
     // Rendering Options
     USE_BLEND,
 
-    MAX_ACTION_FLAGS
+    MAX_ACTION_FLAGS,
+
+    // Trajectory Density Projection, used for 2nd pass tone mapping
+    USE_TRAJECTORY_DENSITY_TONE_MAP
+
   };
 
   enum GlyphType
