@@ -246,6 +246,44 @@ private:
 
     if(srstate.front().state.get(RenderState::USE_TRAJECTORY_DENSITY_TONE_MAP))
 	{
+    	// refer to http://learnopengl.com/#!Advanced-Lighting/HDR
+    	// http://learnopengl.com/code_viewer.php?code=advanced-lighting/hdr
+#if 0
+		#vertex shader for tone mapping
+		layout (location = 0) in vec3 position;
+		layout (location = 1) in vec2 texCoords;
+
+		out vec2 TexCoords;
+
+		void main()
+		{
+			gl_Position = vec4(position, 1.0f);
+			TexCoords = texCoords;
+		}
+
+		#fragment shader for tone mapping
+		out vec4 color;
+		in vec2 TexCoords;
+
+		uniform sampler2D hdrBuffer;
+		uniform float exposure;
+		uniform bool hdr;
+
+		void main()
+		{
+			const float gamma = 2.2;
+			vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+
+			// reinhard
+			// vec3 result = hdrColor / (hdrColor + vec3(1.0));
+			// exposure
+			vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
+			// also gamma correct while we're at it
+			result = pow(result, vec3(1.0 / gamma));
+			color = vec4(result, 1.0f);
+		}
+#endif
+
 //	   std::cout << "trajectory Density Render State selected." << std::endl;
 	   // Set up floating point framebuffer to render scene to
 	   GLuint hdrFBO;
@@ -277,6 +315,71 @@ private:
 //	   if ( GL(glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE)
 //		   std::cout << "Framebuffer not complete!" << std::endl;
 	   GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+	   /////////////////////////////////////////////////////////////////////////
+
+	   // 1. Render scene into floating point framebuffer
+	   glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+	   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	   glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT, 0.1f, 100.0f);
+	   glm::mat4 view       = camera.GetViewMatrix();
+	   glm::mat4 model;
+	   shader.Use();
+	   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"),       1, GL_FALSE, glm::value_ptr(view));
+	   glActiveTexture(GL_TEXTURE0);
+	   glBindTexture(GL_TEXTURE_2D, woodTexture);
+	   // - set lighting uniforms
+	   for (GLuint i = 0; i < lightPositions.size(); i++)
+	   {
+	      glUniform3fv(glGetUniformLocation(shader.Program, ("lights[" + std::to_string(i) + "].Position").c_str()), 1, &lightPositions[i][0]);
+	      glUniform3fv(glGetUniformLocation(shader.Program, ("lights[" + std::to_string(i) + "].Color").c_str()), 1, &lightColors[i][0]);
+	   }
+	   glUniform3fv(glGetUniformLocation(shader.Program, "viewPos"), 1, &camera.Position[0]);
+	   // - render tunnel
+	   model = glm::mat4();
+	   model = glm::translate(model, glm::vec3(0.0f, 0.0f, 25.0));
+	   model = glm::scale(model, glm::vec3(5.0f, 5.0f, 55.0f));
+	   glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	   glUniform1i(glGetUniformLocation(shader.Program, "inverse_normals"), GL_TRUE);
+	   RenderCube();
+	   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	   // 2. Now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's (clamped) color range
+	   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	   hdrShader.Use();
+	   glActiveTexture(GL_TEXTURE0);
+	   glBindTexture(GL_TEXTURE_2D, colorBuffer);
+	   glUniform1i(glGetUniformLocation(hdrShader.Program, "hdr"), hdr);
+	   glUniform1f(glGetUniformLocation(hdrShader.Program, "exposure"), exposure);
+
+	   // render quad...
+	   GLuint quadVAO = 0;
+	   GLuint quadVBO;
+
+	   if (quadVAO == 0)
+	   {
+		   GLfloat quadVertices[] = {
+		      // Positions        // Texture Coords
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, };
+
+		   // Setup plane VAO
+		   glGenVertexArrays(1, &quadVAO);
+		   glGenBuffers(1, &quadVBO);
+		   glBindVertexArray(quadVAO);
+		   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		   glEnableVertexAttribArray(0);
+		   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		   glEnableVertexAttribArray(1);
+		   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		   glBindVertexArray(quadVAO);
+		   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		   glBindVertexArray(0);
+	    }
 	}
 
     if (srstate.front().state.get(RenderState::IS_TEXT))
