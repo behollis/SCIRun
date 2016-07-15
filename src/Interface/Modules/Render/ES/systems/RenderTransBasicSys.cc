@@ -276,6 +276,7 @@ private:
       const es::ComponentGroup<ren::StaticIBOMan>& iboMan,
       const es::ComponentGroup<ren::StaticTextureMan>& texMan) override
   {
+#if 0
 	// Set up floating point framebuffer to render scene to
 	GLuint hdrFBO;
 	GL(glGenFramebuffers(1, &hdrFBO));
@@ -303,6 +304,7 @@ private:
 		   GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0));
 	GL(glFramebufferRenderbuffer(GL_FRAMEBUFFER,
 		   GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth));
+#endif
 
 	/// \todo This needs to be moved to pre-execute.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -310,10 +312,10 @@ private:
 	  return;
 	}
 
-//	GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+	GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
 	// 1. Render scene into floating point framebuffer
-    GL( glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) );
+//    GL( glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) );
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 //    if(srstate.front().state.get(RenderState::USE_TRAJECTORY_DENSITY_TONE_MAP))
@@ -700,7 +702,7 @@ private:
     }
 
     // 2. Now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's (clamped) color range
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //  hdrShader.Use();
 
     std::string vtx("in vec3 position; \n"
@@ -723,6 +725,7 @@ private:
 		    "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
 		    "// also gamma correct while we're at it\n"
 		    "result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
+		    "result = vec3(1,0,0); \n"
 		    "gl_FragColor = vec4(result.rgb, 1.0); }");
 
 //		vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
@@ -736,11 +739,11 @@ private:
 		}
 
 		// Bind shader.
-		glUseProgram(tshdr);
+//		glUseProgram(tshdr);
 
 		GLboolean hdr = true; // Change with 'Space'
 		GLfloat exposure = 1.0f; // Change with Q and E
-
+/*
 	  GL( glActiveTexture(GL_TEXTURE0) );
 	  GL( glBindTexture(GL_TEXTURE_2D, colorBuffer) );
 	  GL( glUniform1i(glGetUniformLocation(tshdr, "hdr"), hdr) );
@@ -775,6 +778,7 @@ private:
 	  glBindVertexArray(quadVAO);
 	  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	  glBindVertexArray(0);
+*/
   }
 };
 

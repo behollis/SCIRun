@@ -92,6 +92,49 @@ ViewSceneDialog::ViewSceneDialog(const std::string& name, ModuleStateHandle stat
   fmt.setDoubleBuffer(true);
   fmt.setDepthBufferSize(24);
 
+#if 0
+  // Set up floating point framebuffer to render scene to
+  GLuint hdrFBO;
+  GL(glGenFramebuffers(1, &hdrFBO));
+
+  // - Create floating point color buffer
+  GLuint colorBuffer;
+  GL(glGenTextures(1, &colorBuffer));
+  GL(glBindTexture(GL_TEXTURE_2D, colorBuffer));
+  int SCR_WIDTH = 500;
+  int SCR_HEIGHT = 500;
+  GL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL));
+  GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+  GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+  // - Create depth buffer (renderbuffer)
+  GLuint rboDepth;
+  GL(glGenRenderbuffers(1, &rboDepth));
+  GL(glBindRenderbuffer(GL_RENDERBUFFER, rboDepth));
+  GL(glRenderbufferStorage(GL_RENDERBUFFER,
+       GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT));
+
+  // - Attach buffers
+  GL(glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO));
+  GL(glFramebufferTexture2D(GL_FRAMEBUFFER,
+       GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0));
+  GL(glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+       GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth));
+
+  /// \todo This needs to be moved to pre-execute.
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+  {
+    return;
+  }
+
+  GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+#endif
+
+  // 1. Render scene into floating point framebuffer
+//    GL( glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO) );
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
   mGLWidget = new GLWidget(new QtGLContext(fmt), parentWidget());
   connect(mGLWidget, SIGNAL(fatalError(const QString&)), this, SIGNAL(fatalError(const QString&)));
   connect(this, SIGNAL(mousePressSignalForTestingGeometryObjectFeedback(int, int)), this, SLOT(sendGeometryFeedbackToState(int, int)));
