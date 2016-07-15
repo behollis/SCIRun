@@ -27,6 +27,7 @@
 */
 
 #include <glm/glm.hpp>
+//#include <Eigen/OpenGLSupport>
 #include <gl-platform/GLPlatform.hpp>
 #include <entity-system/GenericSystem.hpp>
 #include <es-systems/SystemCore.hpp>
@@ -210,6 +211,43 @@ private:
     }
 
     return result;
+  }
+
+  GLint createShader(const char* vtx, const char* frg)
+  {
+    GLint prg_id = glCreateProgram();
+    GLint vtx_id = glCreateShader(GL_VERTEX_SHADER);
+    GLint frg_id = glCreateShader(GL_FRAGMENT_SHADER);
+    GLint ok;
+
+    glShaderSource(vtx_id, 1, &vtx, 0);
+    glCompileShader(vtx_id);
+    glGetShaderiv(vtx_id,GL_COMPILE_STATUS,&ok);
+    if(!ok)
+    {
+      std::cerr << "vtx compilation failed\n";
+    }
+
+    glShaderSource(frg_id, 1, &frg, 0);
+    glCompileShader(frg_id);
+    glGetShaderiv(frg_id,GL_COMPILE_STATUS,&ok);
+    if(!ok)
+    {
+      std::cerr << "frg compilation failed\n";
+    }
+
+    glAttachShader(prg_id, vtx_id);
+    glAttachShader(prg_id, frg_id);
+    glLinkProgram(prg_id);
+    glGetProgramiv(prg_id,GL_LINK_STATUS,&ok);
+    if(!ok)
+    {
+      std::cerr << "linking failed\n";
+    }
+//    printInfoLog(prg_id);
+
+    glUseProgram(prg_id);
+    return prg_id;
   }
 
   void groupExecute(
@@ -665,41 +703,36 @@ private:
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //  hdrShader.Use();
 
-#if 0
-		#vertex shader for tone mapping
-		layout (location = 0) in vec3 position;
-		layout (location = 1) in vec2 texCoords;
+    std::string vtx("#vertex shader for tone mapping\n"
+        "layout (location = 0) in vec3 position;\n"
+        "layout (location = 1) in vec2 texCoords;\n"
+        "out vec2 TexCoords;\n"
+        "void main()\n"
+        "{"
+        "gl_Position = vec4(position, 1.0f);"
+        "TexCoords = texCoords; }");
 
-		out vec2 TexCoords;
+		std::string frag("#fragment shader for tone mapping\n"
+		    "out vec4 color; in vec2 TexCoords; uniform sampler2D hdrBuffer;\n"
+		    "uniform float exposure; uniform bool hdr; "
+		    "void main(){"
+		    "const float gamma = 2.2;"
+		    "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;"
+		    "// reinhard"
+		    "// vec3 result = hdrColor / (hdrColor + vec3(1.0));"
+		    "// exposure"
+		    "vec3 result = vec3(1.0) - exp(-hdrColor * exposure);"
+		    "// also gamma correct while we're at it"
+		    "result = pow(result, vec3(1.0 / gamma));"
+		    "color = vec4(result, 1.0f); }");
 
-		void main()
-		{
-			gl_Position = vec4(position, 1.0f);
-			TexCoords = texCoords;
-		}
+//		vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
+//		fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
 
-		#fragment shader for tone mapping
-		out vec4 color;
-		in vec2 TexCoords;
+		GLint tshdr = createShader( vtx.c_str(), frag.c_str() );
 
-		uniform sampler2D hdrBuffer;
-		uniform float exposure;
-		uniform bool hdr;
-
-		void main()
-		{
-			const float gamma = 2.2;
-			vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
-
-			// reinhard
-			// vec3 result = hdrColor / (hdrColor + vec3(1.0));
-			// exposure
-			vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
-			// also gamma correct while we're at it
-			result = pow(result, vec3(1.0 / gamma));
-			color = vec4(result, 1.0f);
-		}
-#endif
+		// Bind shader.
+		glUseProgram(tshdr);
 
 	  GL( glActiveTexture(GL_TEXTURE0) );
 	  GL( glBindTexture(GL_TEXTURE_2D, colorBuffer) );
@@ -737,6 +770,8 @@ private:
 	  glBindVertexArray(0);
   }
 };
+
+
 
 void registerSystem_RenderBasicTransGeom(CPM_ES_ACORN_NS::Acorn& core)
 {
