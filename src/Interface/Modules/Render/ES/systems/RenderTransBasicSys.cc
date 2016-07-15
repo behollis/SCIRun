@@ -703,41 +703,48 @@ private:
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //  hdrShader.Use();
 
-    std::string vtx("#vertex shader for tone mapping\n"
-        "layout (location = 0) in vec3 position;\n"
-        "layout (location = 1) in vec2 texCoords;\n"
-        "out vec2 TexCoords;\n"
-        "void main()\n"
-        "{"
-        "gl_Position = vec4(position, 1.0f);"
-        "TexCoords = texCoords; }");
+    std::string vtx("in vec3 position; \n"
+        "in vec2 texCoords; \n"
+        "varying vec2 TexCoords;\n "
+        "void main()\n "
+        "{\n "
+        "TexCoords = texCoords; \n"
+        "gl_Position = vec4(position.xyz, 1.0); \n "
+        "}");
 
-		std::string frag("#fragment shader for tone mapping\n"
-		    "out vec4 color; in vec2 TexCoords; uniform sampler2D hdrBuffer;\n"
-		    "uniform float exposure; uniform bool hdr; "
-		    "void main(){"
-		    "const float gamma = 2.2;"
-		    "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;"
-		    "// reinhard"
-		    "// vec3 result = hdrColor / (hdrColor + vec3(1.0));"
-		    "// exposure"
-		    "vec3 result = vec3(1.0) - exp(-hdrColor * exposure);"
-		    "// also gamma correct while we're at it"
-		    "result = pow(result, vec3(1.0 / gamma));"
-		    "color = vec4(result, 1.0f); }");
+		std::string frag("varying vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
+		    "uniform float exposure; uniform bool hdr;\n "
+		    "void main(){\n "
+		    "float gamma = 2.2;\n "
+		    "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
+		    "// reinhard\n"
+		    "// vec3 result = hdrColor / (hdrColor + vec3(1.0));\n"
+		    "// exposure\n"
+		    "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
+		    "// also gamma correct while we're at it\n"
+		    "result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
+		    "gl_FragColor = vec4(result.rgb, 1.0); }");
 
 //		vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
 //		fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
 
-		GLint tshdr = createShader( vtx.c_str(), frag.c_str() );
+		static bool shderloaded = false;
+		static GLint tshdr = 0;
+		if (!shderloaded) {
+		  tshdr = createShader( vtx.c_str(), frag.c_str() );
+		  shderloaded = true;
+		}
 
 		// Bind shader.
 		glUseProgram(tshdr);
 
+		GLboolean hdr = true; // Change with 'Space'
+		GLfloat exposure = 1.0f; // Change with Q and E
+
 	  GL( glActiveTexture(GL_TEXTURE0) );
 	  GL( glBindTexture(GL_TEXTURE_2D, colorBuffer) );
-//	  GL( glUniform1i(glGetUniformLocation(hdrShader.Program, "hdr"), hdr) );
-//	  GL( glUniform1f(glGetUniformLocation(hdrShader.Program, "exposure"), exposure) );
+	  GL( glUniform1i(glGetUniformLocation(tshdr, "hdr"), hdr) );
+	  GL( glUniform1f(glGetUniformLocation(tshdr, "exposure"), exposure) );
 
 	  // render quad...
 	  GLuint quadVAO = 0;
