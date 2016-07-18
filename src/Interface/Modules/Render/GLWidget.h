@@ -49,6 +49,8 @@
 #endif
 #include <QtOpenGL/QGLWidget>
 #include <QGLFramebufferObject>
+#include <QGLFunctions>
+
 
 namespace SCIRun {
 namespace Gui {

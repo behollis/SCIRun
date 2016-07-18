@@ -38,6 +38,7 @@
 #include <QTimer>
 #include <QtDebug>
 #include <Core/Application/Application.h>
+#include <QGLFramebufferObjectFormat>
 
 namespace SCIRun {
 namespace Gui {
@@ -56,6 +57,8 @@ GLWidget::GLWidget(QtGLContext* context, QWidget* parent) :
   std::vector<std::string> shaderSearchDirs;
 
   mContext->makeCurrent();
+
+  initializeGL();
 
   // Call gl platform init.
   CPM_GL_PLATFORM_NS::glPlatformInit();
@@ -91,6 +94,35 @@ GLWidget::~GLWidget()
 //------------------------------------------------------------------------------
 void GLWidget::initializeGL()
 {
+
+  // Set up floating point framebuffer to render scene to
+/*
+  GLuint hdrFBO;
+  glGenFramebuffers(1, &hdrFBO);
+  // - Create floating point color buffer
+  GLuint colorBuffer;
+  glGenTextures(1, &colorBuffer);
+  glBindTexture(GL_TEXTURE_2D, colorBuffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  // - Create depth buffer (renderbuffer)
+  GLuint rboDepth;
+  glGenRenderbuffers(1, &rboDepth);
+  glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+  // - Attach buffers
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+*/
+
+  // create our floating point framebuffer object for HDR
+  QGLFramebufferObjectFormat format;
+  format.setInternalTextureFormat(GL_RGBA16F);
+  mFBO = new QGLFramebufferObject( mGraphics->getScreenWidthPixels(),
+                                   mGraphics->getScreenHeightPixels(),
+                                   format );
 }
 
 //------------------------------------------------------------------------------
