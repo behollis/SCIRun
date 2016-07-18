@@ -58,8 +58,6 @@ GLWidget::GLWidget(QtGLContext* context, QWidget* parent) :
 
   mContext->makeCurrent();
 
-  initializeGL();
-
   // Call gl platform init.
   CPM_GL_PLATFORM_NS::glPlatformInit();
   
@@ -78,6 +76,8 @@ GLWidget::GLWidget(QtGLContext* context, QWidget* parent) :
 
   // We must disable auto buffer swap on the 'paintEvent'.
   setAutoBufferSwap(false);
+
+  initializeGL();
 }
 
 //------------------------------------------------------------------------------
@@ -118,11 +118,18 @@ void GLWidget::initializeGL()
 */
 
   // create our floating point framebuffer object for HDR
-  QGLFramebufferObjectFormat format;
-  format.setInternalTextureFormat(GL_RGBA16F);
+
+//  std::cout << mGraphics->getScreenWidthPixels() << std::endl;
+//  std::cout << mGraphics->getScreenHeightPixels() << std::endl;
+
   mFBO = new QGLFramebufferObject( mGraphics->getScreenWidthPixels(),
                                    mGraphics->getScreenHeightPixels(),
-                                   format );
+                                   QGLFramebufferObject::Depth,
+                                   GL_TEXTURE_2D,
+                                   GL_RGBA16F );
+  bool success = mFBO->bind();
+
+//  std::cout << success << std::endl;
 }
 
 //------------------------------------------------------------------------------

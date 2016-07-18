@@ -48,8 +48,8 @@
 #include <Interface/Modules/Render/namespaces.h>
 #endif
 #include <QtOpenGL/QGLWidget>
-#include <QGLFramebufferObject>
-#include <QGLFunctions>
+#include <QtOpenGL/QGLFramebufferObject>
+#include <QtOpenGL/QGLFunctions>
 
 
 namespace SCIRun {
@@ -107,12 +107,12 @@ private:
   /// Retrieve SRInterface mouse button from mouse event.
   Render::SRInterface::MouseButton getSpireButton(QMouseEvent* event);
 
-  std::shared_ptr<GLContext>            mContext;   ///< Graphics context.
-  std::shared_ptr<Render::SRInterface>  mGraphics;  ///< Interface to spire.
-  QTimer*                               mTimer;
-  QGLFramebufferObject*                 mFBO;
+  std::shared_ptr<GLContext>             mContext;   ///< Graphics context.
+  std::shared_ptr<Render::SRInterface>   mGraphics;  ///< Interface to spire.
+  QGLFramebufferObject*                  mFBO;
+  QTimer*                                mTimer;
 
-  double                                mCurrentTime;
+  double                                 mCurrentTime;
 };
 
 } // end of namespace Gui
