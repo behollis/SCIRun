@@ -165,7 +165,7 @@ void GLWidget::initializeGL()
      GLint tshdr = 0;
 
      // Bind shader.
- //    glUseProgram(tshdr);
+     GLfuncs.glUseProgram(tshdr);
 
      GLboolean hdr = true; // Change with 'Space'
      GLfloat exposure = 1.0f; // Change with Q and E
