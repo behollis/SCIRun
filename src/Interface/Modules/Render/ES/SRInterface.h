@@ -34,6 +34,7 @@
 #include <Interface/Modules/Render/GLContext.h>
 #include "Core.h"
 #include <es-general/comp/Transform.hpp>
+#include <QGLFramebufferObject>
 
 //freetype
 #include <ft2build.h>

@@ -48,11 +48,26 @@
 #include <Interface/Modules/Render/namespaces.h>
 #endif
 #include <QtOpenGL/QGLWidget>
+#include <QGLFramebufferObject>
 
 namespace SCIRun {
 namespace Gui {
 
 class QtGLContext;
+
+/*
+ * http://doc.qt.io/qt-5/qglwidget.html
+http://doc.qt.io/qt-5/qopenglwidget.html *
+ *
+QGLWidget provides functionality for displaying OpenGL graphics integrated into
+a Qt application. It is very simple to use. You inherit from it and use the
+subclass like any other QWidget, except that you have the choice between using
+    QPainter and standard OpenGL rendering commands.
+
+Note: This class is part of the legacy Qt OpenGL module and, like the other QGL
+classes, should be avoided in the new applications. Instead, starting from
+Qt 5.4, prefer using QOpenGLWidget and the QOpenGL classes.
+*/
 
 class GLWidget : public QGLWidget
 {
@@ -93,6 +108,7 @@ private:
   std::shared_ptr<GLContext>            mContext;   ///< Graphics context.
   std::shared_ptr<Render::SRInterface>  mGraphics;  ///< Interface to spire.
   QTimer*                               mTimer;
+  QGLFramebufferObject*                 mFBO;
 
   double                                mCurrentTime;
 };
