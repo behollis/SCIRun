@@ -49,7 +49,6 @@
 #endif
 #include <QtOpenGL/QGLWidget>
 #include <QtOpenGL/QGLFramebufferObject>
-#include <QtOpenGL/QGLFunctions>
 
 
 namespace SCIRun {

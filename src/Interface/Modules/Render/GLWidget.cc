@@ -39,6 +39,8 @@
 #include <QtDebug>
 #include <Core/Application/Application.h>
 #include <QGLFramebufferObjectFormat>
+#include <QGLFunctions>
+
 
 namespace SCIRun {
 namespace Gui {
@@ -129,7 +131,49 @@ void GLWidget::initializeGL()
                                    GL_RGBA16F );
   bool success = mFBO->bind();
 
+  QGLFunctions GLfuncs( this->context() );
+
 //  std::cout << success << std::endl;
+
+  // 2. Now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's (clamped) color range
+ //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ //  hdrShader.Use();
+
+     std::string vtx("in vec3 position; \n"
+         "in vec2 texCoords; \n"
+         "varying vec2 TexCoords;\n "
+         "void main()\n "
+         "{\n "
+         "TexCoords = texCoords; \n"
+         "gl_Position = vec4(position.xyz, 1.0); \n "
+         "}");
+
+     std::string frag("varying vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
+         "uniform float exposure; uniform bool hdr;\n "
+         "void main(){\n "
+         "float gamma = 2.2;\n "
+         "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
+         "// reinhard\n"
+         "// vec3 result = hdrColor / (hdrColor + vec3(1.0));\n"
+         "// exposure\n"
+         "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
+         "// also gamma correct while we're at it\n"
+         "result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
+         "result = vec3(1,0,0); \n"
+         "gl_FragColor = vec4(result.rgb, 1.0); }");
+
+     GLint tshdr = 0;
+
+     // Bind shader.
+ //    glUseProgram(tshdr);
+
+     GLboolean hdr = true; // Change with 'Space'
+     GLfloat exposure = 1.0f; // Change with Q and E
+
+//     glActiveTexture(GL_TEXTURE0);
+//     glBindTexture(GL_TEXTURE_2D, colorBuffer);
+     GLfuncs.glUniform1i(glGetUniformLocation(tshdr, "hdr"), hdr);
+     GLfuncs.glUniform1f(glGetUniformLocation(tshdr, "exposure"), exposure);
 }
 
 //------------------------------------------------------------------------------

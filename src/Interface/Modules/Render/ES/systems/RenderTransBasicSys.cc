@@ -701,84 +701,33 @@ private:
       defaultGLState.front().state.applyRelative(state.front().state);
     }
 
-    // 2. Now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's (clamped) color range
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//  hdrShader.Use();
+    // render quad...
+    GLuint quadVAO = 0;
+    GLuint quadVBO;
+    if (quadVAO == 0)
+    {
+    GLfloat quadVertices[] = {
+       // Positions        // Texture Coords
+     -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+     -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+     1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+     1.0f, -1.0f, 0.0f, 1.0f, 0.0f, };
 
-    std::string vtx("in vec3 position; \n"
-        "in vec2 texCoords; \n"
-        "varying vec2 TexCoords;\n "
-        "void main()\n "
-        "{\n "
-        "TexCoords = texCoords; \n"
-        "gl_Position = vec4(position.xyz, 1.0); \n "
-        "}");
+     // Setup plane VAO
+     GL( glGenVertexArrays(1, &quadVAO) );
+     GL( glGenBuffers(1, &quadVBO) );
+     GL( glBindVertexArray(quadVAO) );
+     GL( glBindBuffer(GL_ARRAY_BUFFER, quadVBO) );
+     GL( glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW) );
+     GL( glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0) );
+     GL( glEnableVertexAttribArray(1) );
+    }
 
-		std::string frag("varying vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
-		    "uniform float exposure; uniform bool hdr;\n "
-		    "void main(){\n "
-		    "float gamma = 2.2;\n "
-		    "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
-		    "// reinhard\n"
-		    "// vec3 result = hdrColor / (hdrColor + vec3(1.0));\n"
-		    "// exposure\n"
-		    "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
-		    "// also gamma correct while we're at it\n"
-		    "result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
-		    "result = vec3(1,0,0); \n"
-		    "gl_FragColor = vec4(result.rgb, 1.0); }");
-
-//		vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
-//		fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
-
-		static bool shderloaded = false;
-		static GLint tshdr = 0;
-		if (!shderloaded) {
-		  tshdr = createShader( vtx.c_str(), frag.c_str() );
-		  shderloaded = true;
-		}
-
-		// Bind shader.
-//		glUseProgram(tshdr);
-
-		GLboolean hdr = true; // Change with 'Space'
-		GLfloat exposure = 1.0f; // Change with Q and E
-/*
-	  GL( glActiveTexture(GL_TEXTURE0) );
-	  GL( glBindTexture(GL_TEXTURE_2D, colorBuffer) );
-	  GL( glUniform1i(glGetUniformLocation(tshdr, "hdr"), hdr) );
-	  GL( glUniform1f(glGetUniformLocation(tshdr, "exposure"), exposure) );
-
-	  // render quad...
-	  GLuint quadVAO = 0;
-	  GLuint quadVBO;
-
-	  if (quadVAO == 0)
-	  {
-		GLfloat quadVertices[] = {
-			  // Positions        // Texture Coords
-			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f, };
-
-		  // Setup plane VAO
-		  glGenVertexArrays(1, &quadVAO);
-		  glGenBuffers(1, &quadVBO);
-		  glBindVertexArray(quadVAO);
-		  glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		  glEnableVertexAttribArray(0);
-		  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-		  glEnableVertexAttribArray(1);
-	  }
-
-	  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-			  5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	  glBindVertexArray(quadVAO);
-	  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	  glBindVertexArray(0);
-*/
+    GL( glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+       5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))) );
+    GL( glBindVertexArray(quadVAO) );
+    GL( glDrawArrays(GL_TRIANGLE_STRIP, 0, 4) );
+    GL( glBindVertexArray(0) );
   }
 };
 
