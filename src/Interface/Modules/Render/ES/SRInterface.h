@@ -68,7 +68,7 @@ namespace SCIRun {
       ///< This can be removed if we use a static
       ///< component for assigning entity IDs.
     public:
-      explicit SRInterface(std::shared_ptr<Gui::GLContext> context, QGLFramebufferObject* fbo,
+      explicit SRInterface(std::shared_ptr<Gui::GLContext> context,
           int frameInitLimit = 100);
       ~SRInterface();
 
@@ -145,6 +145,9 @@ namespace SCIRun {
 
       /// Sets the mouse interaction mode.
       void setMouseMode(MouseMode mode);
+
+      /// Sets the floating point framebuffer.
+      void setFBO(QGLFramebufferObject* fbo);
 
       /// Retrieves mouse interaction mode.
       MouseMode getMouseMode() const;

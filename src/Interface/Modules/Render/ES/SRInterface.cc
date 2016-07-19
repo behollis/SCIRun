@@ -79,7 +79,7 @@ namespace SCIRun {
 
     //------------------------------------------------------------------------------
     SRInterface::SRInterface(std::shared_ptr<Gui::GLContext> context,
-      QGLFramebufferObject* fbo, int frameInitLimit ) :
+      int frameInitLimit ) :
       mSelectedID(0),
       mZoomSpeed(65),
       mMouseMode(MOUSE_OLDSCIRUN),
@@ -97,8 +97,8 @@ namespace SCIRun {
       mFogIntensity(0.0),
       mFogStart(0.0),
       mFogEnd(1.0),
-      mFogColor(glm::vec4(0.0)),
-      mFBO(fbo)
+      mFogColor(glm::vec4(0.0))//,
+//      mFBO(fbo)
     {
       // Create default colormaps.
       //generateTextures();
@@ -160,6 +160,12 @@ namespace SCIRun {
     void SRInterface::setMouseMode(MouseMode mode)
     {
       mMouseMode = mode;
+    }
+
+    //------------------------------------------------------------------------------
+    void SRInterface::setFBO(QGLFramebufferObject* fbo)
+    {
+      mFBO = fbo;
     }
 
     //------------------------------------------------------------------------------
@@ -1339,6 +1345,8 @@ namespace SCIRun {
 
       mContext->makeCurrent();
 
+      if (mFBO)
+        bool success = mFBO->bind();
 
       updateCamera();
       updateWorldLight();
