@@ -34,7 +34,7 @@
 #include <Interface/Modules/Render/GLContext.h>
 #include "Core.h"
 #include <es-general/comp/Transform.hpp>
-#include <QGLFramebufferObject>
+#include <QtOpenGL/QGLFramebufferObject>
 
 //freetype
 #include <ft2build.h>
@@ -68,7 +68,8 @@ namespace SCIRun {
       ///< This can be removed if we use a static
       ///< component for assigning entity IDs.
     public:
-      explicit SRInterface(std::shared_ptr<Gui::GLContext> context, int frameInitLimit = 100);
+      explicit SRInterface(std::shared_ptr<Gui::GLContext> context, QGLFramebufferObject* fbo,
+          int frameInitLimit = 100);
       ~SRInterface();
 
       /// Call this whenever the window is resized. This will modify the viewport
@@ -352,6 +353,7 @@ namespace SCIRun {
 
       int axesFailCount_;
       std::shared_ptr<Gui::GLContext>   mContext;         ///< Context to use for rendering.
+      QGLFramebufferObject*   mFBO;         ///< frame buffer object for HDR
       std::vector<SRObject>             mSRObjects;       ///< All SCIRun objects.
       Core::Geometry::BBox              mSceneBBox;       ///< Scene's AABB. Recomputed per-frame.
 

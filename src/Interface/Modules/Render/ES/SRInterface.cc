@@ -64,6 +64,8 @@
 #include "comp/LightingUniforms.h"
 #include "comp/ClippingPlaneUniforms.h"
 
+#include <QGLFramebufferObject>
+
 using namespace SCIRun::Core::Datatypes;
 using namespace SCIRun::Graphics::Datatypes;
 using namespace SCIRun::Core::Geometry;
@@ -77,7 +79,7 @@ namespace SCIRun {
 
     //------------------------------------------------------------------------------
     SRInterface::SRInterface(std::shared_ptr<Gui::GLContext> context,
-      int frameInitLimit) :
+      QGLFramebufferObject* fbo, int frameInitLimit ) :
       mSelectedID(0),
       mZoomSpeed(65),
       mMouseMode(MOUSE_OLDSCIRUN),
@@ -95,7 +97,8 @@ namespace SCIRun {
       mFogIntensity(0.0),
       mFogStart(0.0),
       mFogEnd(1.0),
-      mFogColor(glm::vec4(0.0))
+      mFogColor(glm::vec4(0.0)),
+      mFBO(fbo)
     {
       // Create default colormaps.
       //generateTextures();
@@ -1335,6 +1338,7 @@ namespace SCIRun {
       ///       objects, or the view point has changed).
 
       mContext->makeCurrent();
+
 
       updateCamera();
       updateWorldLight();

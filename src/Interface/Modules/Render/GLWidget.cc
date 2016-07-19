@@ -70,7 +70,7 @@ GLWidget::GLWidget(QtGLContext* context, QWidget* parent) :
   }
   const int frameInitLimit = frameInitLimitFromCommandLine.get_value_or(100);
 
-  mGraphics.reset(new Render::SRInterface(mContext, frameInitLimit));
+  mGraphics.reset(new Render::SRInterface(mContext, mFBO, frameInitLimit ));
 
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(updateRenderer()));
@@ -270,6 +270,7 @@ void GLWidget::updateRenderer()
 
   try
   {
+    bool success = mFBO->bind();
     mGraphics->doFrame(mCurrentTime, updateTime);
     mContext->swapBuffers();
   }
