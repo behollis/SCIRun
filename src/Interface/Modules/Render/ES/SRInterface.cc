@@ -169,6 +169,12 @@ namespace SCIRun {
     }
 
     //------------------------------------------------------------------------------
+    void SRInterface::setShader(GLint toneshader)
+    {
+      mToneMappingShader = toneshader;
+    }
+
+    //------------------------------------------------------------------------------
     SRInterface::MouseMode SRInterface::getMouseMode() const
     {
       return mMouseMode;
@@ -1343,10 +1349,9 @@ namespace SCIRun {
       /// \todo Only render a frame if something has changed (new or deleted
       ///       objects, or the view point has changed).
 
+//      mFBO->bind();
       mContext->makeCurrent();
-
-      if (mFBO)
-        bool success = mFBO->bind();
+      mCore.setFBO(mFBO->handle());
 
       updateCamera();
       updateWorldLight();
@@ -1363,6 +1368,39 @@ namespace SCIRun {
           renderCoordinateAxes();
         }
       }
+
+      mContext->makeCurrent();
+
+      GL( glUseProgram(mToneMappingShader) );
+
+
+      // render quad...
+      GLuint quadVAO = 0;
+      GLuint quadVBO;
+//      if (quadVAO == 0)
+//      {
+      GLfloat quadVertices[] = {
+         // Positions        // Texture Coords
+       -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+       -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+       1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+       1.0f, -1.0f, 0.0f, 1.0f, 0.0f, };
+
+       // Setup plane VAO
+       GL( glGenVertexArrays(1, &quadVAO) );
+       GL( glGenBuffers(1, &quadVBO) );
+       GL( glBindVertexArray(quadVAO) );
+       GL( glBindBuffer(GL_ARRAY_BUFFER, quadVBO) );
+       GL( glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW) );
+       GL( glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0) );
+       GL( glEnableVertexAttribArray(1) );
+//      }
+
+      GL( glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+         5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))) );
+      GL( glBindVertexArray(quadVAO) );
+      GL( glDrawArrays(GL_TRIANGLE_STRIP, 0, 4) );
+      GL( glBindVertexArray(0) );
 
 
       // Set directional light source (in world space).

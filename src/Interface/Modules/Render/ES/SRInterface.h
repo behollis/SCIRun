@@ -149,6 +149,9 @@ namespace SCIRun {
       /// Sets the floating point framebuffer.
       void setFBO(QGLFramebufferObject* fbo);
 
+      /// Sets the floating point framebuffer.
+      void setShader(GLint toneshader);
+
       /// Retrieves mouse interaction mode.
       MouseMode getMouseMode() const;
 
@@ -357,6 +360,7 @@ namespace SCIRun {
       int axesFailCount_;
       std::shared_ptr<Gui::GLContext>   mContext;         ///< Context to use for rendering.
       QGLFramebufferObject*   mFBO;         ///< frame buffer object for HDR
+      GLint                             mToneMappingShader;
       std::vector<SRObject>             mSRObjects;       ///< All SCIRun objects.
       Core::Geometry::BBox              mSceneBBox;       ///< Scene's AABB. Recomputed per-frame.
 

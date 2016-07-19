@@ -96,6 +96,7 @@ protected:
   virtual void initializeGL();
   virtual void resizeGL(int width, int height);
   void closeEvent(QCloseEvent *evt);
+  GLint createShader(const char* vtx, const char* frg);
 
 public Q_SLOTS:
   // Only use when not using threading.
@@ -109,6 +110,7 @@ private:
   std::shared_ptr<GLContext>             mContext;   ///< Graphics context.
   std::shared_ptr<Render::SRInterface>   mGraphics;  ///< Interface to spire.
   QGLFramebufferObject*                  mFBO;
+  GLint                                 mToneMapShaders;
   QTimer*                                mTimer;
 
   double                                 mCurrentTime;

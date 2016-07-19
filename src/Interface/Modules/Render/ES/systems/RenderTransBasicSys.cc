@@ -213,43 +213,6 @@ private:
     return result;
   }
 
-  GLint createShader(const char* vtx, const char* frg)
-  {
-    GLint prg_id = glCreateProgram();
-    GLint vtx_id = glCreateShader(GL_VERTEX_SHADER);
-    GLint frg_id = glCreateShader(GL_FRAGMENT_SHADER);
-    GLint ok;
-
-    glShaderSource(vtx_id, 1, &vtx, 0);
-    glCompileShader(vtx_id);
-    glGetShaderiv(vtx_id,GL_COMPILE_STATUS,&ok);
-    if(!ok)
-    {
-      std::cerr << "vtx compilation failed\n";
-    }
-
-    glShaderSource(frg_id, 1, &frg, 0);
-    glCompileShader(frg_id);
-    glGetShaderiv(frg_id,GL_COMPILE_STATUS,&ok);
-    if(!ok)
-    {
-      std::cerr << "frg compilation failed\n";
-    }
-
-    glAttachShader(prg_id, vtx_id);
-    glAttachShader(prg_id, frg_id);
-    glLinkProgram(prg_id);
-    glGetProgramiv(prg_id,GL_LINK_STATUS,&ok);
-    if(!ok)
-    {
-      std::cerr << "linking failed\n";
-    }
-//    printInfoLog(prg_id);
-
-    glUseProgram(prg_id);
-    return prg_id;
-  }
-
   void groupExecute(
       es::ESCoreBase&, uint64_t /* entityID */,
       const es::ComponentGroup<RenderBasicGeom>& geom,
@@ -276,16 +239,16 @@ private:
       const es::ComponentGroup<ren::StaticIBOMan>& iboMan,
       const es::ComponentGroup<ren::StaticTextureMan>& texMan) override
   {
+
 	/// \todo This needs to be moved to pre-execute.
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 	  return;
 	}
 
-	GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-
 	// 1. Render scene into floating point framebuffer
-
+	GLint fbo = 1;//1;
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     if (srstate.front().state.get(RenderState::IS_TEXT))
     {
@@ -653,36 +616,9 @@ private:
       defaultGLState.front().state.applyRelative(state.front().state);
     }
 
-    // render quad...
-    GLuint quadVAO = 0;
-    GLuint quadVBO;
-    if (quadVAO == 0)
-    {
-    GLfloat quadVertices[] = {
-       // Positions        // Texture Coords
-     -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-     -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-     1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-     1.0f, -1.0f, 0.0f, 1.0f, 0.0f, };
-
-     // Setup plane VAO
-     GL( glGenVertexArrays(1, &quadVAO) );
-     GL( glGenBuffers(1, &quadVBO) );
-     GL( glBindVertexArray(quadVAO) );
-     GL( glBindBuffer(GL_ARRAY_BUFFER, quadVBO) );
-     GL( glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW) );
-     GL( glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0) );
-     GL( glEnableVertexAttribArray(1) );
-    }
-
-    GL( glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-       5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))) );
-    GL( glBindVertexArray(quadVAO) );
-    GL( glDrawArrays(GL_TRIANGLE_STRIP, 0, 4) );
-    GL( glBindVertexArray(0) );
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 };
-
 
 
 void registerSystem_RenderBasicTransGeom(CPM_ES_ACORN_NS::Acorn& core)

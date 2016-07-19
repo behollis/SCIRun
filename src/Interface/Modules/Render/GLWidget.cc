@@ -98,6 +98,44 @@ GLWidget::~GLWidget()
 }
 
 //------------------------------------------------------------------------------
+GLint GLWidget::createShader(const char* vtx, const char* frg)
+  {
+    GLint prg_id = glCreateProgram();
+    GLint vtx_id = glCreateShader(GL_VERTEX_SHADER);
+    GLint frg_id = glCreateShader(GL_FRAGMENT_SHADER);
+    GLint ok;
+
+    glShaderSource(vtx_id, 1, &vtx, 0);
+    glCompileShader(vtx_id);
+    glGetShaderiv(vtx_id,GL_COMPILE_STATUS,&ok);
+    if(!ok)
+    {
+      std::cerr << "vtx compilation failed\n";
+    }
+
+    glShaderSource(frg_id, 1, &frg, 0);
+    glCompileShader(frg_id);
+    glGetShaderiv(frg_id,GL_COMPILE_STATUS,&ok);
+    if(!ok)
+    {
+      std::cerr << "frg compilation failed\n";
+    }
+
+    glAttachShader(prg_id, vtx_id);
+    glAttachShader(prg_id, frg_id);
+    glLinkProgram(prg_id);
+    glGetProgramiv(prg_id,GL_LINK_STATUS,&ok);
+    if(!ok)
+    {
+      std::cerr << "linking failed\n";
+    }
+//    printInfoLog(prg_id);
+
+    glUseProgram(prg_id);
+    return prg_id;
+  }
+
+//------------------------------------------------------------------------------
 void GLWidget::initializeGL()
 {
 
@@ -163,21 +201,21 @@ void GLWidget::initializeGL()
          "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
          "// also gamma correct while we're at it\n"
          "result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
-         "result = vec3(1,0,0); \n"
+         "result = vec3(0,1,0); \n"
          "gl_FragColor = vec4(result.rgb, 1.0); }");
 
-     GLint tshdr = 0;
+     mToneMapShaders = createShader(vtx.c_str(), frag.c_str());
 
-     // Bind shader.
-     GLfuncs.glUseProgram(tshdr);
+     // Bind shaders
+//     GLfuncs.glUseProgram(mToneMapShaders);
 
      GLboolean hdr = true; // Change with 'Space'
      GLfloat exposure = 1.0f; // Change with Q and E
 
 //     glActiveTexture(GL_TEXTURE0);
 //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
-     GLfuncs.glUniform1i(glGetUniformLocation(tshdr, "hdr"), hdr);
-     GLfuncs.glUniform1f(glGetUniformLocation(tshdr, "exposure"), exposure);
+     GLfuncs.glUniform1i(glGetUniformLocation(mToneMapShaders, "hdr"), hdr);
+     GLfuncs.glUniform1f(glGetUniformLocation(mToneMapShaders, "exposure"), exposure);
 }
 
 //------------------------------------------------------------------------------

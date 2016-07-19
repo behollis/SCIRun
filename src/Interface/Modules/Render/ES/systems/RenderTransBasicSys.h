@@ -34,8 +34,13 @@
 namespace SCIRun {
 namespace Render {
 
+//int fbuf = 0;
+//int fbo = 0;
+
 void        registerSystem_RenderBasicTransGeom(CPM_ES_ACORN_NS::Acorn& core);
 const char* getSystemName_RenderBasicTransGeom();
+//void setFramebufferIndex(int idx) { fbuf = idx; };
+//void setFramebufferObjectIndex(int idx) { fbo = idx; };
 
 } // namespace Render
 } // namespace SCIRun

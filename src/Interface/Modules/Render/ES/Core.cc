@@ -123,6 +123,8 @@ void ESCore::execute(double currentTime, double constantFrameTime)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
+//  glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
+
   // Perform execution of systems.
   uint64_t timeInMS = static_cast<uint64_t>(mCurrentTime * 1000.0);
   mSystems->runSystems(*this, timeInMS);
