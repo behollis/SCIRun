@@ -175,6 +175,8 @@ void GLWidget::initializeGL()
 
   QGLFunctions GLfuncs( this->context() );
 
+  std::cout << mFBO->handle() << std::endl;
+
 //  std::cout << success << std::endl;
 
   // 2. Now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's (clamped) color range
@@ -312,8 +314,51 @@ void GLWidget::updateRenderer()
 
   try
   {
-    bool success = mFBO->bind();
+//    bool success = mFBO->bind();
     mGraphics->doFrame(mCurrentTime, updateTime);
+
+    // draw screen-aligned quad
+//    GL( glViewport(0,0, mGraphics->getScreenWidthPixels(), mGraphics->getScreenWidthPixels() ) );
+
+/*
+    GL(glMatrixMode(GL_PROJECTION));
+    GL(glLoadIdentity());
+    GL(glOrtho(0,1,0,1,0,1));
+    GL(glMatrixMode(GL_MODELVIEW));
+
+    GL( glColor3f(1, 1,1) );
+    GL(glBegin(GL_QUADS));
+    GL(glVertex2f(-1,-1));
+    GL(glVertex2f(1,-1));
+    GL(glVertex2f(1,1));
+    GL(glVertex2f(-1,1));
+    GL(glEnd());
+    GL(glFlush());
+*/
+
+/*
+    // The fullscreen quad's FBO
+    GLuint quad_VertexArrayID;
+    glGenVertexArrays(1, &quad_VertexArrayID);
+    glBindVertexArray(quad_VertexArrayID);
+
+    static const GLfloat g_quad_vertex_buffer_data[] = {
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        1.0f,  1.0f, 0.0f,
+    };
+
+    GLuint quad_vertexbuffer;
+    glGenBuffers(1, &quad_vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0,0, mGraphics->getScreenWidthPixels(), mGraphics->getScreenWidthPixels() );
+*/
     mContext->swapBuffers();
   }
   catch (const SCIRun::Render::SRInterfaceFailure& e)

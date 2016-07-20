@@ -247,8 +247,11 @@ private:
 	}
 
 	// 1. Render scene into floating point framebuffer
-	GLint fbo = 1;//1;
+	GLint fbo = 0;//1;
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+
+
 
     if (srstate.front().state.get(RenderState::IS_TEXT))
     {
@@ -617,6 +620,7 @@ private:
     }
 
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    GL( glUseProgram(mToneMappingShader) );
   }
 };
 

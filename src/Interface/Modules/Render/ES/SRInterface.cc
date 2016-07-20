@@ -1369,38 +1369,25 @@ namespace SCIRun {
         }
       }
 
+      GL(glUseProgram(mToneMappingShader));
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//      GL( glViewport(0,0, getScreenWidthPixels(), getScreenWidthPixels() ) );
+
+      GL(glMatrixMode(GL_PROJECTION));
+      GL(glLoadIdentity());
+      GL(glOrtho(0,1,0,1,0,1));
+      GL(glMatrixMode(GL_MODELVIEW));
+
+      GL( glColor3f(0, 1,1) );
+      GL(glBegin(GL_TRIANGLE_STRIP));
+      GL(glVertex2f(-1,-1));  GL(glTexCoord2f(0,0));
+      GL(glVertex2f(1,-1));  GL(glTexCoord2f(1,0));
+      GL(glVertex2f(1,1));  GL(glTexCoord2f(1,1));
+      GL(glVertex2f(-1,1));  GL(glTexCoord2f(0,1));
+      GL(glEnd());
+      GL(glFlush());
+
       mContext->makeCurrent();
-
-      GL( glUseProgram(mToneMappingShader) );
-
-
-      // render quad...
-      GLuint quadVAO = 0;
-      GLuint quadVBO;
-//      if (quadVAO == 0)
-//      {
-      GLfloat quadVertices[] = {
-         // Positions        // Texture Coords
-       -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-       -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-       1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-       1.0f, -1.0f, 0.0f, 1.0f, 0.0f, };
-
-       // Setup plane VAO
-       GL( glGenVertexArrays(1, &quadVAO) );
-       GL( glGenBuffers(1, &quadVBO) );
-       GL( glBindVertexArray(quadVAO) );
-       GL( glBindBuffer(GL_ARRAY_BUFFER, quadVBO) );
-       GL( glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW) );
-       GL( glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0) );
-       GL( glEnableVertexAttribArray(1) );
-//      }
-
-      GL( glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-         5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))) );
-      GL( glBindVertexArray(quadVAO) );
-      GL( glDrawArrays(GL_TRIANGLE_STRIP, 0, 4) );
-      GL( glBindVertexArray(0) );
 
 
       // Set directional light source (in world space).
