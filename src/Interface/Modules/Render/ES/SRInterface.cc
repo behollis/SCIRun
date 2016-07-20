@@ -1370,7 +1370,10 @@ namespace SCIRun {
       }
 
       GL(glUseProgram(mToneMappingShader));
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glBindFramebuffer(GL_FRAMEBUFFER, 0); //render to gl context buffer
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, mFBO->texture());
 //      GL( glViewport(0,0, getScreenWidthPixels(), getScreenWidthPixels() ) );
 
       GL(glMatrixMode(GL_PROJECTION));
@@ -1378,14 +1381,14 @@ namespace SCIRun {
       GL(glOrtho(0,1,0,1,0,1));
       GL(glMatrixMode(GL_MODELVIEW));
 
-      GL( glColor3f(0, 1,1) );
-      GL(glBegin(GL_TRIANGLE_STRIP));
+//      GL( glColor3f(0, 1,1) );
+      GL(glBegin(GL_QUADS));
       GL(glVertex2f(-1,-1));  GL(glTexCoord2f(0,0));
       GL(glVertex2f(1,-1));  GL(glTexCoord2f(1,0));
       GL(glVertex2f(1,1));  GL(glTexCoord2f(1,1));
       GL(glVertex2f(-1,1));  GL(glTexCoord2f(0,1));
       GL(glEnd());
-      GL(glFlush());
+//      GL(glFlush());
 
       mContext->makeCurrent();
 

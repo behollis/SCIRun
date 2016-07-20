@@ -247,7 +247,7 @@ private:
 	}
 
 	// 1. Render scene into floating point framebuffer
-	GLint fbo = 0;//1;
+	GLint fbo = 1;
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
 

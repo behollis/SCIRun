@@ -131,7 +131,7 @@ GLint GLWidget::createShader(const char* vtx, const char* frg)
     }
 //    printInfoLog(prg_id);
 
-    glUseProgram(prg_id);
+//    glUseProgram(prg_id);
     return prg_id;
   }
 
@@ -166,12 +166,42 @@ void GLWidget::initializeGL()
 //  std::cout << mGraphics->getScreenWidthPixels() << std::endl;
 //  std::cout << mGraphics->getScreenHeightPixels() << std::endl;
 
-  mFBO = new QGLFramebufferObject( mGraphics->getScreenWidthPixels(),
-                                   mGraphics->getScreenHeightPixels(),
+  int SCR_WIDTH = mGraphics->getScreenWidthPixels();
+  int SCR_HEIGHT = mGraphics->getScreenHeightPixels();
+
+  mFBO = new QGLFramebufferObject( SCR_WIDTH,
+                                   SCR_HEIGHT,
                                    QGLFramebufferObject::Depth,
                                    GL_TEXTURE_2D,
                                    GL_RGBA16F );
-  bool success = mFBO->bind();
+
+  // Set up floating point framebuffer to render scene to
+#if 0
+  GLuint hdrFBO;
+  glGenFramebuffers(1, &hdrFBO);
+  // - Create floating point color buffer
+  GLuint colorBuffer;
+  glGenTextures(1, &colorBuffer);
+  glBindTexture(GL_TEXTURE_2D, colorBuffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, mGraphics->getScreenWidthPixels(),
+      mGraphics->getScreenHeightPixels(), 0, GL_RGBA, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  // - Create depth buffer (renderbuffer)
+  GLuint rboDepth;
+  glGenRenderbuffers(1, &rboDepth);
+  glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+  // - Attach buffers
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      std::cout << "Framebuffer not complete!" << std::endl;
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
+
+//  bool success = mFBO->bind();
 
   QGLFunctions GLfuncs( this->context() );
 
@@ -202,11 +232,13 @@ void GLWidget::initializeGL()
          "// exposure\n"
          "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
          "// also gamma correct while we're at it\n"
-         "result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
+         "//result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
          "result = vec3(0,1,0); \n"
          "gl_FragColor = vec4(result.rgb, 1.0); }");
 
      mToneMapShaders = createShader(vtx.c_str(), frag.c_str());
+
+     mGraphics->setShader( mToneMapShaders );
 
      // Bind shaders
 //     GLfuncs.glUseProgram(mToneMapShaders);
@@ -216,8 +248,9 @@ void GLWidget::initializeGL()
 
 //     glActiveTexture(GL_TEXTURE0);
 //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
-     GLfuncs.glUniform1i(glGetUniformLocation(mToneMapShaders, "hdr"), hdr);
-     GLfuncs.glUniform1f(glGetUniformLocation(mToneMapShaders, "exposure"), exposure);
+     glUniform1i(glGetUniformLocation(mToneMapShaders, "hdr"), hdr);
+     glUniform1f(glGetUniformLocation(mToneMapShaders, "exposure"), exposure);
+     glUniform1f(glGetUniformLocation(mToneMapShaders, "hdrBuffer"), mFBO->texture());
 }
 
 //------------------------------------------------------------------------------
