@@ -233,7 +233,7 @@ void GLWidget::initializeGL()
          "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
          "// also gamma correct while we're at it\n"
          "//result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
-         "result = vec3(0,1,0); \n"
+         "result = vec3(exposure, exposure,0); \n"
          "gl_FragColor = vec4(result.rgb, 1.0); }");
 
      mToneMapShaders = createShader(vtx.c_str(), frag.c_str());
@@ -241,7 +241,7 @@ void GLWidget::initializeGL()
      mGraphics->setShader( mToneMapShaders );
 
      // Bind shaders
-//     GLfuncs.glUseProgram(mToneMapShaders);
+     glUseProgram(mToneMapShaders);
 
      GLboolean hdr = true; // Change with 'Space'
      GLfloat exposure = 1.0f; // Change with Q and E

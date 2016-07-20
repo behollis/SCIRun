@@ -1370,6 +1370,17 @@ namespace SCIRun {
       }
 
       GL(glUseProgram(mToneMappingShader));
+
+      GLboolean hdr = true; // Change with 'Space'
+      GLfloat exposure = 0.4f; // Change with Q and E
+//      exposure += 0.1;
+
+      //     glActiveTexture(GL_TEXTURE0);
+      //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
+      GL(glUniform1i(glGetUniformLocation(mToneMappingShader, "hdr"), hdr));
+      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), exposure));
+      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "hdrBuffer"), mFBO->texture()));
+
       glBindFramebuffer(GL_FRAMEBUFFER, 0); //render to gl context buffer
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //      glActiveTexture(GL_TEXTURE0);
@@ -1383,10 +1394,10 @@ namespace SCIRun {
 
 //      GL( glColor3f(0, 1,1) );
       GL(glBegin(GL_QUADS));
-      GL(glVertex2f(-1,-1));  GL(glTexCoord2f(0,0));
-      GL(glVertex2f(1,-1));  GL(glTexCoord2f(1,0));
-      GL(glVertex2f(1,1));  GL(glTexCoord2f(1,1));
-      GL(glVertex2f(-1,1));  GL(glTexCoord2f(0,1));
+      GL(glTexCoord2f(0,0)); GL(glVertex2f(-1,-1));
+      GL(glTexCoord2f(1,0));GL(glVertex2f(1,-1));
+      GL(glTexCoord2f(1,1));GL(glVertex2f(1,1));
+      GL(glTexCoord2f(0,1));GL(glVertex2f(-1,1));
       GL(glEnd());
 //      GL(glFlush());
 
