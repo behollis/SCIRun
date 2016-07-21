@@ -213,16 +213,19 @@ void GLWidget::initializeGL()
  //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  //  hdrShader.Use();
 
-     std::string vtx("in vec3 position; \n"
-         "in vec2 texCoords; \n"
-         "varying vec2 TexCoords;\n "
+     std::string vtx("#version 330 core\n"
+                     "in vec3 position;\n"
+                     "in vec2 texcoords;\n"
+         "//in vec2 texCoords; \n"
+         "out vec2 TexCoords;\n "
          "void main()\n "
          "{\n "
-         "TexCoords = texCoords; \n"
          "gl_Position = vec4(position.xyz, 1.0); \n "
+         "TexCoords = texcoords; \n"
          "}");
 
-     std::string frag("varying vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
+     std::string frag("#version 330 core\n"
+         "in vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
          "uniform float exposure; uniform bool hdr;\n "
          "void main(){\n "
          "float gamma = 2.2;\n "
@@ -233,7 +236,7 @@ void GLWidget::initializeGL()
          "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
          "// also gamma correct while we're at it\n"
          "//result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
-         "result = vec3(exposure, exposure,0); \n"
+         "result = vec3(TexCoords.t, TexCoords.s,0); \n"
          "gl_FragColor = vec4(result.rgb, 1.0); }");
 
      mToneMapShaders = createShader(vtx.c_str(), frag.c_str());

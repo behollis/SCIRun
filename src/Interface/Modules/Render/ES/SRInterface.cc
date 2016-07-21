@@ -1383,7 +1383,8 @@ namespace SCIRun {
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0); //render to gl context buffer
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//      glActiveTexture(GL_TEXTURE0);
+
+//      glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, mFBO->texture());
 //      GL( glViewport(0,0, getScreenWidthPixels(), getScreenWidthPixels() ) );
 
@@ -1392,15 +1393,44 @@ namespace SCIRun {
       GL(glOrtho(0,1,0,1,0,1));
       GL(glMatrixMode(GL_MODELVIEW));
 
+#if 0
+
 //      GL( glColor3f(0, 1,1) );
       GL(glBegin(GL_QUADS));
-      GL(glTexCoord2f(0,0)); GL(glVertex2f(-1,-1));
-      GL(glTexCoord2f(1,0));GL(glVertex2f(1,-1));
-      GL(glTexCoord2f(1,1));GL(glVertex2f(1,1));
-      GL(glTexCoord2f(0,1));GL(glVertex2f(-1,1));
+      GL(glTexCoord2i(0,1)); GL(glVertex2f(-1,-1));
+      GL(glTexCoord2i(1,1));GL(glVertex2f(1,-1));
+      GL(glTexCoord2i(1,0));GL(glVertex2f(1,1));
+      GL(glTexCoord2i(0,0));GL(glVertex2f(-1,1));
       GL(glEnd());
 //      GL(glFlush());
+#endif
 
+      static GLuint quadVAO = 0;
+      static GLuint quadVBO;
+
+      if (quadVAO == 0)
+          {
+              GLfloat quadVertices[] = {
+                  // Positions        // Texture Coords
+                  -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+                  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                  1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+                  1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+              };
+              // Setup plane VAO
+              glGenVertexArrays(1, &quadVAO);
+              glGenBuffers(1, &quadVBO);
+              glBindVertexArray(quadVAO);
+              glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+              glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+              glEnableVertexAttribArray(0);
+              glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+              glEnableVertexAttribArray(1);
+              glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+          }
+          glBindVertexArray(quadVAO);
+          glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+          glBindVertexArray(0);
       mContext->makeCurrent();
 
 
