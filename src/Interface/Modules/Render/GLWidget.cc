@@ -234,19 +234,19 @@ void GLWidget::initializeGL()
          "in vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
          "uniform float exposure; uniform bool hdr;\n "
          "void main(){\n "
-         "float gamma = 2.2;\n "
+         "float gamma = 4.2;\n "
          "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb\n;"
-         "color = vec4(hdrColor, 1.0);\n"
+         "//color = vec4(hdrColor, 1.0);\n"
          "//vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
          "// reinhard\n"
          "//vec3 result = hdrColor / (hdrColor + vec3(1.0));\n"
          "// exposure\n"
-         "//vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
+         "vec3 result = vec3(1.0) - exp(-hdrColor * exposure);\n "
          "// also gamma correct while we're at it\n"
-         "//result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
+         "result = pow( result, vec3(1.0 / gamma) );\n "
          "//result = vec3(TexCoords.t, TexCoords.s,0); \n"
-         "//color = vec4(result.rgb, 1.0);\n"
-         " }");
+         "color = vec4(result.rgb, 1.0);\n"
+         "}");
 
      mToneMapShaders = createShader(vtx.c_str(), frag.c_str());
 

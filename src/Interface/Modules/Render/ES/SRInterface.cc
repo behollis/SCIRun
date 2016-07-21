@@ -1393,7 +1393,7 @@ namespace SCIRun {
       GL(glOrtho(0,1,0,1,0,1));
       GL(glMatrixMode(GL_MODELVIEW));
 
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 #if 0
 
