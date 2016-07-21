@@ -169,11 +169,13 @@ void GLWidget::initializeGL()
   int SCR_WIDTH = mGraphics->getScreenWidthPixels();
   int SCR_HEIGHT = mGraphics->getScreenHeightPixels();
 
+
   mFBO = new QGLFramebufferObject( SCR_WIDTH,
                                    SCR_HEIGHT,
                                    QGLFramebufferObject::Depth,
                                    GL_TEXTURE_2D,
-                                   GL_RGBA16F );
+                                   GL_RGBA32F );
+
 
   // Set up floating point framebuffer to render scene to
 #if 0
@@ -199,13 +201,16 @@ void GLWidget::initializeGL()
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
       std::cout << "Framebuffer not complete!" << std::endl;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  std::cout << hdrFBO << std::endl;
+  std::cout << colorBuffer << std::endl;
 #endif
 
-//  bool success = mFBO->bind();
+  bool success = mFBO->bind();
 
   QGLFunctions GLfuncs( this->context() );
 
-  std::cout << mFBO->handle() << std::endl;
+//  std::cout << mFBO->handle() << std::endl;
 
 //  std::cout << success << std::endl;
 
@@ -225,19 +230,23 @@ void GLWidget::initializeGL()
          "}");
 
      std::string frag("#version 330 core\n"
+         "out vec4 color;\n"
          "in vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
          "uniform float exposure; uniform bool hdr;\n "
          "void main(){\n "
          "float gamma = 2.2;\n "
-         "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
+         "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb\n;"
+         "color = vec4(hdrColor, 1.0);\n"
+         "//vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
          "// reinhard\n"
-         "// vec3 result = hdrColor / (hdrColor + vec3(1.0));\n"
+         "//vec3 result = hdrColor / (hdrColor + vec3(1.0));\n"
          "// exposure\n"
-         "vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
+         "//vec3 result = vec3(1.0, 1, 1) - exp(-hdrColor * exposure);\n "
          "// also gamma correct while we're at it\n"
          "//result = pow( result, vec3(1.0 / gamma, 1.0 / gamma, 1.0 / gamma) );\n "
-         "result = vec3(TexCoords.t, TexCoords.s,0); \n"
-         "gl_FragColor = vec4(result.rgb, 1.0); }");
+         "//result = vec3(TexCoords.t, TexCoords.s,0); \n"
+         "//color = vec4(result.rgb, 1.0);\n"
+         " }");
 
      mToneMapShaders = createShader(vtx.c_str(), frag.c_str());
 

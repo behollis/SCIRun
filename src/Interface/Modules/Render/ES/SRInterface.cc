@@ -1382,7 +1382,7 @@ namespace SCIRun {
       GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "hdrBuffer"), mFBO->texture()));
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0); //render to gl context buffer
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 //      glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, mFBO->texture());
@@ -1392,6 +1392,8 @@ namespace SCIRun {
       GL(glLoadIdentity());
       GL(glOrtho(0,1,0,1,0,1));
       GL(glMatrixMode(GL_MODELVIEW));
+
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 #if 0
 
