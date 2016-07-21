@@ -229,12 +229,32 @@ void GLWidget::initializeGL()
          "TexCoords = texcoords; \n"
          "}");
 
+/* from A. Kuhn & N. Lindow & T. Günther & A. Wiebel & H. Theisel & H.-C. Hege
+   Density-based Trajectory Rendering
+
+     The Function maps color values component-wise from
+     [0,∞) to [0,1] by 1−e
+     et·v
+     , where v is a channel of the color
+     and et is a negative parameter steering the strength of the
+     mapping. For the subtractive blending, we have to apply a
+     pre-mapping, because the color channels lie in the range of
+     (−∞,1]. Finally, a gamma correction is necessary to avoid
+     color changes by the tone mapping. In summary, our rendering
+     contains four interactive parameters: A global line width
+     scale rs, an alpha blending fall-off parameter e f
+     , a tone mappign
+     parameter et , and eg for the gamma correction. Depending
+     on rs and e f both parameters adjust the resulting brightness
+     and contrast.
+*/
+
      std::string frag("#version 330 core\n"
          "out vec4 color;\n"
          "in vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
          "uniform float exposure; uniform bool hdr;\n "
          "void main(){\n "
-         "float gamma = 4.2;\n "
+         "float gamma = 5.0;\n "
          "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb\n;"
          "//color = vec4(hdrColor, 1.0);\n"
          "//vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
@@ -256,7 +276,7 @@ void GLWidget::initializeGL()
      glUseProgram(mToneMapShaders);
 
      GLboolean hdr = true; // Change with 'Space'
-     GLfloat exposure = 1.0f; // Change with Q and E
+     GLfloat exposure = 5.0f; // Change with Q and E
 
 //     glActiveTexture(GL_TEXTURE0);
 //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
