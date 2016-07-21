@@ -174,7 +174,7 @@ void GLWidget::initializeGL()
                                    SCR_HEIGHT,
                                    QGLFramebufferObject::Depth,
                                    GL_TEXTURE_2D,
-                                   GL_RGBA32F );
+                                   GL_RGBA16F );
 
 
   // Set up floating point framebuffer to render scene to

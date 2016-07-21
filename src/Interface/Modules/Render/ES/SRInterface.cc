@@ -198,9 +198,12 @@ namespace SCIRun {
       mScreenWidth = width;
       mScreenHeight = height;
 
+      // need switch here for either floating point or reg buffer.
       mContext->makeCurrent();
       GL(glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height)));
-
+      mFBO->bind();
+      GL(glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height)));
+      mContext->makeCurrent();
       // Obtain StaticScreenDims component and populate.
       gen::StaticScreenDims* dims = mCore.getStaticComponent<gen::StaticScreenDims>();
       if (dims)
@@ -232,6 +235,9 @@ namespace SCIRun {
         /*znear*/  orthoZNear, /*zfar*/  orthoZFar);
       orthoCam->data.setOrthoProjection(orthoProj, aspect, 2.0f, 2.0f, orthoZNear, orthoZFar);
       orthoCam->data.winWidth = static_cast<float>(width);
+
+
+
     }
 
     //------------------------------------------------------------------------------
@@ -1386,12 +1392,14 @@ namespace SCIRun {
 
 //      glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, mFBO->texture());
+//      glPushAttrib(GL_VIEWPORT_BIT):
 //      GL( glViewport(0,0, getScreenWidthPixels(), getScreenWidthPixels() ) );
 
-      GL(glMatrixMode(GL_PROJECTION));
-      GL(glLoadIdentity());
-      GL(glOrtho(0,1,0,1,0,1));
-      GL(glMatrixMode(GL_MODELVIEW));
+//      GL(glMatrixMode(GL_PROJECTION));
+//      glPushMatrix();
+//      GL(glLoadIdentity());
+//      GL(glOrtho(0,1,0,1,0,1));
+//      GL(glMatrixMode(GL_MODELVIEW));
 
 //      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1433,7 +1441,10 @@ namespace SCIRun {
           glBindVertexArray(quadVAO);
           glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
           glBindVertexArray(0);
+
       mContext->makeCurrent();
+
+//      glPopMatrix();
 
 
       // Set directional light source (in world space).
