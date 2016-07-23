@@ -60,6 +60,8 @@
 #include "../comp/LightingUniforms.h"
 #include "../comp/ClippingPlaneUniforms.h"
 
+#include "../RenderSysGlobals.h"
+
 namespace es = CPM_ES_NS;
 namespace shaders = CPM_GL_SHADERS_NS;
 using namespace SCIRun::Graphics::Datatypes;
@@ -247,8 +249,8 @@ private:
 	}
 
 	// 1. Render scene into floating point framebuffer
-	GLint fbo = 1;
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+//	GLint fbo = 1;
+	glBindFramebuffer(GL_FRAMEBUFFER, g_fbo_index);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 

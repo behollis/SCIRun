@@ -31,7 +31,11 @@
 
 #include <es-acorn/Acorn.hpp>
 #include <gl-state/GLState.hpp>
+#include "RenderSysGlobals.h"
+
 //#include <QGLFramebufferObject>
+
+//#include "./systems/RenderTransBasicSys.h"
 
 namespace SCIRun {
 namespace Render {
@@ -45,7 +49,7 @@ public:
 
   void execute(double currentTime, double constantFrameTime);
   void setBackgroundColor(float r, float g, float b, float a);
-  void setFBO(GLint idx) { mFBO = idx; }
+  void setFBO(GLint idx) { mFBO = idx; g_fbo_index = idx;}
   
 private:
 
@@ -55,7 +59,7 @@ private:
 
   float                     mFPS;             ///< Actual FPS of system.
   float                     mLastRealTime;    ///< Last realtime passed into the core.
-  GLint     mFBO;
+  GLint                     mFBO;
 
   float r_, g_, b_, a_;
 };

@@ -134,6 +134,7 @@ public:
   GlyphType mGlyphType = POINT_GLYPH;
 
   Core::Datatypes::ColorRGB defaultColor;
+
 };
 
 

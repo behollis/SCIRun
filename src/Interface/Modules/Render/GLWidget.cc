@@ -95,6 +95,8 @@ GLWidget::~GLWidget()
     //std::cout << "Terminating spire." << std::endl;
     mGraphics.reset();
   }
+
+  delete mFBO;
 }
 
 //------------------------------------------------------------------------------
@@ -352,6 +354,19 @@ void GLWidget::resizeGL(int width, int height)
 {
   mGraphics->eventResize(static_cast<size_t>(width),
                          static_cast<size_t>(height));
+
+  delete mFBO;
+
+  mFBO = new QGLFramebufferObject( static_cast<size_t>(width),
+                                   static_cast<size_t>(height),
+                                   QGLFramebufferObject::Depth,
+                                   GL_TEXTURE_2D,
+                                   GL_RGBA16F );
+
+  mGraphics->setFBO( mFBO );
+
+  std::cout << mFBO->handle() << std::endl;
+
 }
 
 //------------------------------------------------------------------------------

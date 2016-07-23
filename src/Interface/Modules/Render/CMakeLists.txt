@@ -42,6 +42,7 @@ SET(Interface_Modules_Render_HEADERS
   QtGLContext.h
 #  QtGLFramebufferObject.h
   Screenshot.h
+  ES/RenderSysGlobals.h
   ES/SRCamera.h
   ES/SRInterface.h
   ES/SRUtil.h
@@ -67,6 +68,7 @@ SET(Interface_Modules_Render_SOURCES
   QtGLContext.cc
 #  QtGLFramebufferObject.cc
   Screenshot.cc
+  ES/RenderSysGlobals.cc
   ES/SRCamera.cc
   ES/SRInterface.cc
   ES/SRUtil.cc

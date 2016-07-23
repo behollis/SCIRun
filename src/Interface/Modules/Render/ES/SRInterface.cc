@@ -166,6 +166,7 @@ namespace SCIRun {
     void SRInterface::setFBO(QGLFramebufferObject* fbo)
     {
       mFBO = fbo;
+      mCore.setFBO(mFBO->handle());
     }
 
     //------------------------------------------------------------------------------
