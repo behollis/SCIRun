@@ -839,6 +839,8 @@ void GeometryBuilder::renderFacesLinear(
   }
 #endif
 
+  // testing jenkins setup with github
+
   // vertex attributes for trajectory density projection...
   attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
   attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
