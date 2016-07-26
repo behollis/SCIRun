@@ -30,6 +30,8 @@
 uniform mat4    uProjIVObject;      // Projection * Inverse View * World XForm
 uniform vec4    uColor;             // Uniform color
 uniform mat4    uInverseView;       // world -> view
+uniform float uFallOff;
+uniform float uExpansionLength;
 
 // Attributes
 attribute vec3  aPos;
@@ -46,7 +48,7 @@ varying float fall_off;
 
 void main( void )
 {
-
+  float offset_scale = uExpansionLength;
   vec4 tangent = vec4(aTangent.xyz, 1.0);
   
   // instead of what Kuhn does, just take gl_Vertex in View space. 
@@ -59,7 +61,7 @@ void main( void )
   vec3 viewsp_offset_dir = cross(vec3(viewsp_tangent.xyz), -viewsp_vtx_pos3); 
   vec3 viewsp_offset_dir_norm = normalize( viewsp_offset_dir );
   
-  float offset_scale = 0.003; 
+//  float offset_scale = 0.003; 
   vec4 new_viewsp_vtx_pos = vec4((viewsp_offset_dir_norm * offset_scale * aRadius) 
    + viewsp_vtx_pos3, 1.0); 
 
@@ -89,7 +91,7 @@ void main( void )
   vFogCoord = uInverseView * vPos;
 */
   fColor = vec4(1,0,0,0.5);
-  fall_off = 0.95;
+  fall_off = uFallOff;
   expansion_dir = aRadius;
 }
 

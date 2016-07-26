@@ -844,6 +844,8 @@ void GeometryBuilder::renderFacesLinear(
   // vertex attributes for trajectory density projection...
   attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
   attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
+  uniforms.push_back(SpireSubPass::Uniform("uExpansionLength", 0.003));
+  uniforms.push_back(SpireSubPass::Uniform("uFallOff", 1.0f));
 //  attribs.push_back(SpireVBO::AttributeData("aColor", sizeof(int)));
 
   std::cout << numVBOElements << std::endl;
