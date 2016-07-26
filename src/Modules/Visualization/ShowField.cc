@@ -1630,3 +1630,10 @@ const AlgorithmParameterName ShowFieldModule::TextSize("TextSize");
 const AlgorithmParameterName ShowFieldModule::TextPrecision("TextPrecision");
 const AlgorithmParameterName ShowFieldModule::TextColoring("TextColoring");
 const AlgorithmParameterName ShowFieldModule::UseFaceNormals("UseFaceNormals");
+const AlgorithmParameterName ShowFieldModule::ExpansionLength("ExpansionLength");
+const AlgorithmParameterName ShowFieldModule::FalloffExponent("FalloffExponent");
+const AlgorithmParameterName ShowFieldModule::HDRPassThrough("HDRPassThrough");
+const AlgorithmParameterName ShowFieldModule::Exposure("Exposure");
+const AlgorithmParameterName ShowFieldModule::Gamma("Gamma");
+
+

@@ -90,11 +90,11 @@ ShowFieldDialog::ShowFieldDialog(const std::string& name, ModuleStateHandle stat
   connect(textColorPushButton_, SIGNAL(clicked()), this, SLOT(assignDefaultTextColor()));
 
   // trajectory density projection
-  addCheckBoxManager(hdrToggle_, ShowFieldModule::NodeTransparency);
-  addSliderManager(lineExpansion_, ShowFieldModule::SphereResolution);
-  addSliderManager(lineFalloff_, ShowFieldModule::SphereResolution);
-  addSliderManager(exposure_, ShowFieldModule::SphereResolution);
-  addSliderManager(gamma_, ShowFieldModule::SphereResolution);
+  addCheckBoxManager(hdrToggle_, ShowFieldModule::HDRPassThrough);
+  addSliderManager(lineExpansion_, ShowFieldModule::ExpansionLength);
+  addSliderManager(lineFalloff_, ShowFieldModule::FalloffExponent);
+  addSliderManager(exposure_, ShowFieldModule::Exposure);
+  addSliderManager(gamma_, ShowFieldModule::Gamma);
   groupBox_8->setVisible(true);
 
   /////Set unused widgets to be not visible
