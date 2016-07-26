@@ -89,6 +89,14 @@ ShowFieldDialog::ShowFieldDialog(const std::string& name, ModuleStateHandle stat
   connect(defaultMeshColorButton_, SIGNAL(clicked()), this, SLOT(assignDefaultMeshColor()));
   connect(textColorPushButton_, SIGNAL(clicked()), this, SLOT(assignDefaultTextColor()));
 
+  // trajectory density projection
+  addCheckBoxManager(hdrToggle_, ShowFieldModule::NodeTransparency);
+  addSliderManager(lineExpansion_, ShowFieldModule::SphereResolution);
+  addSliderManager(lineFalloff_, ShowFieldModule::SphereResolution);
+  addSliderManager(exposure_, ShowFieldModule::SphereResolution);
+  addSliderManager(gamma_, ShowFieldModule::SphereResolution);
+  groupBox_8->setVisible(true);
+
   /////Set unused widgets to be not visible
   //Nodes Tab
   //label_4->setVisible(false); // Sphere scale lable
