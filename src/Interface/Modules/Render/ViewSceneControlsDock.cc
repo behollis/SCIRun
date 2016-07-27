@@ -160,6 +160,8 @@ ViewSceneControlsDock::ViewSceneControlsDock(const QString& name, ViewSceneDialo
   ////Controls Tab
   transparencyGroupBox_->setVisible(false);
 
+//  Hdrgroupbox_->setVisible(true);
+
 }
 
 void ViewSceneControlsDock::setSampleColor(const QColor& color)
