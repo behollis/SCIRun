@@ -103,9 +103,9 @@ namespace SCIRun {
         static const Core::Algorithms::AlgorithmParameterName UseFaceNormals;
         static const Core::Algorithms::AlgorithmParameterName ExpansionLength;
         static const Core::Algorithms::AlgorithmParameterName FalloffExponent;
-        static const Core::Algorithms::AlgorithmParameterName HDRPassThrough;
-        static const Core::Algorithms::AlgorithmParameterName Exposure;
-        static const Core::Algorithms::AlgorithmParameterName Gamma;
+ //       static const Core::Algorithms::AlgorithmParameterName HDRPassThrough;
+ //       static const Core::Algorithms::AlgorithmParameterName Exposure;
+ //       static const Core::Algorithms::AlgorithmParameterName Gamma;
 
 
         INPUT_PORT(0, Field, LegacyField);

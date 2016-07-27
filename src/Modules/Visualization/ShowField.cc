@@ -193,9 +193,9 @@ void ShowFieldModule::setStateDefaults()
 
   state->setValue(ExpansionLength,0.005 );
   state->setValue(FalloffExponent,0.5);
-  state->setValue(HDRPassThrough,false);
-  state->setValue(Exposure,1.0);
-  state->setValue(Gamma,1.0);
+//  state->setValue(HDRPassThrough,false);
+//  state->setValue(Exposure,1.0);
+//  state->setValue(Gamma,1.0);
 
   // NOTE: We need to add radio buttons for USE_DEFAULT_COLOR, COLORMAP, and
   // COLOR_CONVERT. USE_DEFAULT_COLOR is selected by default. COLOR_CONVERT
@@ -1646,8 +1646,8 @@ const AlgorithmParameterName ShowFieldModule::TextColoring("TextColoring");
 const AlgorithmParameterName ShowFieldModule::UseFaceNormals("UseFaceNormals");
 const AlgorithmParameterName ShowFieldModule::ExpansionLength("ExpansionLength");
 const AlgorithmParameterName ShowFieldModule::FalloffExponent("FalloffExponent");
-const AlgorithmParameterName ShowFieldModule::HDRPassThrough("HDRPassThrough");
-const AlgorithmParameterName ShowFieldModule::Exposure("Exposure");
-const AlgorithmParameterName ShowFieldModule::Gamma("Gamma");
+//const AlgorithmParameterName ShowFieldModule::HDRPassThrough("HDRPassThrough");
+//const AlgorithmParameterName ShowFieldModule::Exposure("Exposure");
+//const AlgorithmParameterName ShowFieldModule::Gamma("Gamma");
 
 
