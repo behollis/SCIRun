@@ -78,9 +78,22 @@ ShowFieldDialog::ShowFieldDialog(const std::string& name, ModuleStateHandle stat
   addRadioButtonGroupManager({ nodesAsPointsButton_, nodesAsSpheresButton_ }, ShowFieldModule::NodeAsSpheres);
   addRadioButtonGroupManager({ textColoringRadioButton_, colormapLookupTextRadioButton_, conversionRGBTextRadioButton_ }, ShowFieldModule::TextColoring);
 
+
+  // trajectory density projection
+  addCheckBoxManager(hdrToggle_, ShowFieldModule::HDRPassThrough);
+  addSliderManager(lineExpansion_, ShowFieldModule::ExpansionLength);
+  addSliderManager(lineFalloff_, ShowFieldModule::FalloffExponent);
+  addSliderManager(exposure_, ShowFieldModule::Exposure);
+  addSliderManager(gamma_, ShowFieldModule::Gamma);
+
   connectButtonsToExecuteSignal({ showNodesCheckBox_, showEdgesCheckBox_, showFacesCheckBox_, enableTransparencyNodesCheckBox_,
-    enableTransparencyEdgesCheckBox_, enableTransparencyFacesCheckBox_, invertNormalsCheckBox, edgesAsLinesButton_,
-    edgesAsCylindersButton_, nodesAsPointsButton_, nodesAsSpheresButton_ });
+      enableTransparencyEdgesCheckBox_, enableTransparencyFacesCheckBox_, invertNormalsCheckBox, edgesAsLinesButton_,
+      edgesAsCylindersButton_, nodesAsPointsButton_, nodesAsSpheresButton_, hdrToggle_});
+
+//  connectSliderToExecuteSignal(lineExpansion_);
+//  connectSliderToExecuteSignal(lineFalloff_);
+//  connectSliderToExecuteSignal(exposure_);
+//  connectSliderToExecuteSignal(gamma_);
 
   connectButtonToExecuteSignal(useFaceNormalsCheckBox_);
 
@@ -89,13 +102,8 @@ ShowFieldDialog::ShowFieldDialog(const std::string& name, ModuleStateHandle stat
   connect(defaultMeshColorButton_, SIGNAL(clicked()), this, SLOT(assignDefaultMeshColor()));
   connect(textColorPushButton_, SIGNAL(clicked()), this, SLOT(assignDefaultTextColor()));
 
-  // trajectory density projection
-  addCheckBoxManager(hdrToggle_, ShowFieldModule::HDRPassThrough);
-  addSliderManager(lineExpansion_, ShowFieldModule::ExpansionLength);
-  addSliderManager(lineFalloff_, ShowFieldModule::FalloffExponent);
-  addSliderManager(exposure_, ShowFieldModule::Exposure);
-  addSliderManager(gamma_, ShowFieldModule::Gamma);
   groupBox_8->setVisible(true);
+
 
   /////Set unused widgets to be not visible
   //Nodes Tab

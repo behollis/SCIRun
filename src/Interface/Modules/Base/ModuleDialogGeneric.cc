@@ -102,6 +102,16 @@ void ModuleDialogGeneric::connectComboToExecuteSignal(QComboBox* box)
   */
 }
 
+void ModuleDialogGeneric::connectSliderToExecuteSignal(QSlider* slider)
+{
+  connect(slider, SIGNAL(valueChanged()), this, SIGNAL(executeFromStateChangeTriggered()));
+  if (disablerAdd_ && disablerRemove_)
+  {
+    disablerAdd_(slider);
+    needToRemoveFromDisabler_.push_back(slider);
+  }
+}
+
 void ModuleDialogGeneric::updateWindowTitle(const QString& title)
 {
   setWindowTitle(title);
