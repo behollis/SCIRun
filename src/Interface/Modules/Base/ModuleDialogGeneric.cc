@@ -104,11 +104,21 @@ void ModuleDialogGeneric::connectComboToExecuteSignal(QComboBox* box)
 
 void ModuleDialogGeneric::connectSliderToExecuteSignal(QSlider* slider)
 {
-  connect(slider, SIGNAL(valueChanged()), this, SIGNAL(executeFromStateChangeTriggered()));
+  connect( slider, SIGNAL(valueChanged(int)), this, SIGNAL(executeActionTriggered()) );
   if (disablerAdd_ && disablerRemove_)
   {
     disablerAdd_(slider);
     needToRemoveFromDisabler_.push_back(slider);
+  }
+}
+
+void ModuleDialogGeneric::connectDoubleSpinBoxToExecuteSignal(QDoubleSpinBox* spinbox)
+{
+  connect( spinbox, SIGNAL(valueChanged(double)), this, SIGNAL(executeActionTriggered()) );
+  if (disablerAdd_ && disablerRemove_)
+  {
+    disablerAdd_(spinbox);
+    needToRemoveFromDisabler_.push_back(spinbox);
   }
 }
 
@@ -165,6 +175,7 @@ void ModuleDialogGeneric::executeInteractivelyToggled(bool toggle)
 void ModuleDialogGeneric::connectStateChangeToExecute()
 {
   connect(this, SIGNAL(executeFromStateChangeTriggered()), this, SIGNAL(executeActionTriggered()));
+//  connect(this, SIGNAL(valueHasChanged()), this, SIGNAL(executeActionTriggered()));
 }
 
 void ModuleDialogGeneric::disconnectStateChangeToExecute()

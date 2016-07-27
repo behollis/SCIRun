@@ -81,19 +81,19 @@ ShowFieldDialog::ShowFieldDialog(const std::string& name, ModuleStateHandle stat
 
   // trajectory density projection
   addCheckBoxManager(hdrToggle_, ShowFieldModule::HDRPassThrough);
-  addSliderManager(lineExpansion_, ShowFieldModule::ExpansionLength);
-  addSliderManager(lineFalloff_, ShowFieldModule::FalloffExponent);
-  addSliderManager(exposure_, ShowFieldModule::Exposure);
-  addSliderManager(gamma_, ShowFieldModule::Gamma);
+  addDoubleSpinBoxManager(lineExpansion_, ShowFieldModule::ExpansionLength);
+  addDoubleSpinBoxManager(lineFalloff_, ShowFieldModule::FalloffExponent);
+  addDoubleSpinBoxManager(exposure_, ShowFieldModule::Exposure);
+  addDoubleSpinBoxManager(gamma_, ShowFieldModule::Gamma);
 
   connectButtonsToExecuteSignal({ showNodesCheckBox_, showEdgesCheckBox_, showFacesCheckBox_, enableTransparencyNodesCheckBox_,
       enableTransparencyEdgesCheckBox_, enableTransparencyFacesCheckBox_, invertNormalsCheckBox, edgesAsLinesButton_,
       edgesAsCylindersButton_, nodesAsPointsButton_, nodesAsSpheresButton_, hdrToggle_});
 
-//  connectSliderToExecuteSignal(lineExpansion_);
-//  connectSliderToExecuteSignal(lineFalloff_);
-//  connectSliderToExecuteSignal(exposure_);
-//  connectSliderToExecuteSignal(gamma_);
+  connectDoubleSpinBoxToExecuteSignal(lineExpansion_);
+  connectDoubleSpinBoxToExecuteSignal(lineFalloff_);
+  connectDoubleSpinBoxToExecuteSignal(exposure_);
+  connectDoubleSpinBoxToExecuteSignal(gamma_);
 
   connectButtonToExecuteSignal(useFaceNormalsCheckBox_);
 

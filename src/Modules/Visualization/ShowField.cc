@@ -191,6 +191,12 @@ void ShowFieldModule::setStateDefaults()
   state->setValue(UseFaceNormals, false);
   state->setValue(FaceInvertNormals, false);
 
+  state->setValue(ExpansionLength,0.005 );
+  state->setValue(FalloffExponent,0.5);
+  state->setValue(HDRPassThrough,false);
+  state->setValue(Exposure,1.0);
+  state->setValue(Gamma,1.0);
+
   // NOTE: We need to add radio buttons for USE_DEFAULT_COLOR, COLORMAP, and
   // COLOR_CONVERT. USE_DEFAULT_COLOR is selected by default. COLOR_CONVERT
   // is more up in the air.
@@ -202,7 +208,7 @@ void ShowFieldModule::execute()
   auto colorMap = getOptionalInput(ColorMapObject);
 
   if (needToExecute())
-  {
+  { std::cout << "testing execute" << std::endl;
     updateAvailableRenderOptions(field);
     GeometryHandle geom = builder_->buildGeometryObject(field, colorMap, get_state(), *this, this);
     sendOutput(SceneGraph, geom);
@@ -844,8 +850,12 @@ void GeometryBuilder::renderFacesLinear(
   // vertex attributes for trajectory density projection...
   attribs.push_back(SpireVBO::AttributeData("aRadius", sizeof(float)));
   attribs.push_back(SpireVBO::AttributeData("aTangent", 3 * sizeof(float)));
-  float expansion = moduleState->getValue(ShowFieldModule::ExpansionLength).toDouble() / 100.0;
-  float falloff = moduleState->getValue(ShowFieldModule::FalloffExponent).toDouble() / 100.0;
+  float expansion = moduleState->getValue(ShowFieldModule::ExpansionLength).toDouble();
+  float falloff = moduleState->getValue(ShowFieldModule::FalloffExponent).toDouble();
+
+  std::cout << "EXPANSION " << expansion << std::endl;
+  std::cout << "FALLOFF " << falloff << std::endl;
+
   uniforms.push_back(SpireSubPass::Uniform("uExpansionLength", expansion));
   uniforms.push_back(SpireSubPass::Uniform("uFallOff", falloff));
 //  attribs.push_back(SpireVBO::AttributeData("aColor", sizeof(int)));
