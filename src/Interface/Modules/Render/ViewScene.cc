@@ -620,6 +620,21 @@ void ViewSceneDialog::viewBarButtonClicked()
   mDownViewBox->setCurrentIndex(0);
 }
 
+void ViewSceneDialog::handleExposureChange(double val)
+{
+  std::cout << "test - handleExposureChange: " << val << std::endl;
+}
+
+void ViewSceneDialog::handleHDRState(int val)
+{
+  std::cout << "test - handleHDRChange: " << val << std::endl;
+}
+
+void ViewSceneDialog::handleGammaChange(double val)
+{
+  std::cout << "test - handleGammaChange: " << val << std::endl;
+}
+
 //------------------------------------------------------------------------------
 void ViewSceneDialog::viewAxisSelected(int index)
 {

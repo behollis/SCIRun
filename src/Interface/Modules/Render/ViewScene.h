@@ -99,6 +99,9 @@ namespace SCIRun {
       void screenshotClicked();
       void saveNewGeometryChanged(int state);
       void sendGeometryFeedbackToState(int x, int y);
+      void handleExposureChange(double val);
+      void handleHDRState(int val);
+      void handleGammaChange(double val);
       //Clipping Plane 
       void setClippingPlaneIndex(int index);
       void setClippingPlaneVisible(bool value);

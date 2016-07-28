@@ -126,6 +126,11 @@ ViewSceneControlsDock::ViewSceneControlsDock(const QString& name, ViewSceneDialo
   connect(this, SIGNAL(itemUnselected(const QString&)), parent, SLOT(handleUnselectedItem(const QString&)));
   connect(this, SIGNAL(itemSelected(const QString&)), parent, SLOT(handleSelectedItem(const QString&)));
 
+  //HDR
+  connect(exposureSpinBox_, SIGNAL(valueChanged(double)), parent, SLOT(handleExposureChange(double)));
+  connect(hdrCheckBox_, SIGNAL(stateChanged(int)), parent, SLOT(handleHDRState(int)));
+  connect(gammaSpinBox_, SIGNAL(valueChanged(double)), parent, SLOT(handleGammaChange(double)));
+
 
   setSampleColor(Qt::black);
 
