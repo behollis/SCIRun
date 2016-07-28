@@ -622,17 +622,20 @@ void ViewSceneDialog::viewBarButtonClicked()
 
 void ViewSceneDialog::handleExposureChange(double val)
 {
-  std::cout << "test - handleExposureChange: " << val << std::endl;
+//  std::cout << "test - handleExposureChange: " << val << std::endl;
+  mGLWidget->setExposure(val);
 }
 
 void ViewSceneDialog::handleHDRState(int val)
 {
-  std::cout << "test - handleHDRChange: " << val << std::endl;
+//  std::cout << "test - handleHDRChange: " << val << std::endl;
+  mGLWidget->setHDRState(val);
 }
 
 void ViewSceneDialog::handleGammaChange(double val)
 {
-  std::cout << "test - handleGammaChange: " << val << std::endl;
+//  std::cout << "test - handleGammaChange: " << val << std::endl;
+  mGLWidget->setGamma(val);
 }
 
 //------------------------------------------------------------------------------

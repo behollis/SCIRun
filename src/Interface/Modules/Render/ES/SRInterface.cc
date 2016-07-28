@@ -569,6 +569,25 @@ namespace SCIRun {
     }
 
     //------------------------------------------------------------------------------
+    void SRInterface::setHDRState(bool val)
+    {
+      mHDR = val;
+    }
+
+    //------------------------------------------------------------------------------
+    void SRInterface::setExposure(double val)
+    {
+      mExposure = val;
+    }
+
+
+    //------------------------------------------------------------------------------
+    void SRInterface::setGamma(double val)
+    {
+      mGamma = val;
+    }
+
+    //------------------------------------------------------------------------------
     void SRInterface::showOrientation(bool value)
     {
       showOrientation_ = value;
@@ -1378,14 +1397,15 @@ namespace SCIRun {
 
       GL(glUseProgram(mToneMappingShader));
 
-      GLboolean hdr = true; // Change with 'Space'
-      GLfloat exposure = 0.4f; // Change with Q and E
+//      GLboolean hdr = true; // Change with 'Space'
+//      GLfloat exposure = 0.4f; // Change with Q and E
 //      exposure += 0.1;
 
       //     glActiveTexture(GL_TEXTURE0);
       //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
-      GL(glUniform1i(glGetUniformLocation(mToneMappingShader, "hdr"), hdr));
-      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), exposure));
+      GL(glUniform1i(glGetUniformLocation(mToneMappingShader, "hdr"), mHDR));
+      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), mExposure));
+      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), mGamma));
       GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "hdrBuffer"), mFBO->texture()));
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0); //render to gl context buffer

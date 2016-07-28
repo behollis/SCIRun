@@ -83,6 +83,9 @@ public:
   /// Required function for single threaded interfaces that have multiple
   /// contexts running on the same thread.
   void makeCurrent();
+  void setHDRState(int);
+  void setExposure(double);
+  void setGamma(double);
 
 Q_SIGNALS:
   void fatalError(const QString& message);
@@ -107,12 +110,14 @@ private:
   /// Retrieve SRInterface mouse button from mouse event.
   Render::SRInterface::MouseButton getSpireButton(QMouseEvent* event);
 
-  std::shared_ptr<GLContext>             mContext;   ///< Graphics context.
-  std::shared_ptr<Render::SRInterface>   mGraphics;  ///< Interface to spire.
-  QGLFramebufferObject*                  mFBO;
+  std::shared_ptr<GLContext>            mContext;   ///< Graphics context.
+  std::shared_ptr<Render::SRInterface>  mGraphics;  ///< Interface to spire.
+  QGLFramebufferObject*                 mFBO;
   GLint                                 mToneMapShaders;
-  QTimer*                                mTimer;
-
+  QTimer*                               mTimer;
+  double                                exposure;
+  double                                gamma;
+  bool                                   hdr;
   double                                 mCurrentTime;
 };
 

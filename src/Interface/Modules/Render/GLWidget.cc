@@ -137,6 +137,28 @@ GLint GLWidget::createShader(const char* vtx, const char* frg)
     return prg_id;
   }
 
+void GLWidget::setHDRState(int val)
+{
+  if (hdr)
+    hdr = false;
+  else
+    hdr = true;
+
+  mGraphics->setHDRState(val);
+}
+
+void GLWidget::setGamma(double val)
+{
+  gamma = val;
+  mGraphics->setGamma(val);
+}
+
+void GLWidget::setExposure(double val)
+{
+  exposure = val;
+  mGraphics->setExposure(val);
+}
+
 //------------------------------------------------------------------------------
 void GLWidget::initializeGL()
 {
@@ -254,9 +276,9 @@ void GLWidget::initializeGL()
      std::string frag("#version 330 core\n"
          "out vec4 color;\n"
          "in vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
-         "uniform float exposure; uniform bool hdr;\n "
+         "uniform float exposure; uniform bool hdr; uniform float gamma;\n "
          "void main(){\n "
-         "float gamma = 5.0;\n "
+         "//float gamma = 5.0;\n "
          "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb\n;"
          "//color = vec4(hdrColor, 1.0);\n"
          "//vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
@@ -277,13 +299,14 @@ void GLWidget::initializeGL()
      // Bind shaders
      glUseProgram(mToneMapShaders);
 
-     GLboolean hdr = true; // Change with 'Space'
-     GLfloat exposure = 5.0f; // Change with Q and E
+//    GLboolean hdr = true; // Change with 'Space'
+//     GLfloat exposure = 5.0f; // Change with Q and E
 
 //     glActiveTexture(GL_TEXTURE0);
 //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
      glUniform1i(glGetUniformLocation(mToneMapShaders, "hdr"), hdr);
      glUniform1f(glGetUniformLocation(mToneMapShaders, "exposure"), exposure);
+     glUniform1f(glGetUniformLocation(mToneMapShaders, "gamma"), gamma);
      glUniform1f(glGetUniformLocation(mToneMapShaders, "hdrBuffer"), mFBO->texture());
 }
 
@@ -396,6 +419,7 @@ void GLWidget::updateRenderer()
   {
 //    bool success = mFBO->bind();
     mGraphics->doFrame(mCurrentTime, updateTime);
+
 
     // draw screen-aligned quad
 //    GL( glViewport(0,0, mGraphics->getScreenWidthPixels(), mGraphics->getScreenWidthPixels() ) );

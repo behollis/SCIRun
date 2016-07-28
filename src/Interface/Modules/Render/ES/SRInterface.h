@@ -213,6 +213,10 @@ namespace SCIRun {
       //get scenenox
       Core::Geometry::BBox getSceneBox();
 
+      void setExposure(double val);
+      void setGamma(double val);
+      void setHDRState(bool val);
+
     private:
 
       class DepthIndex {
@@ -392,6 +396,10 @@ namespace SCIRun {
       double                            mFogStart;
       double                            mFogEnd;
       glm::vec4                         mFogColor;
+
+      double                            mGamma;
+      double                            mExposure;
+      bool                              mHDR;
     };
 
   } // namespace Render
