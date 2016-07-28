@@ -1403,7 +1403,7 @@ namespace SCIRun {
 
       //     glActiveTexture(GL_TEXTURE0);
       //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
-      GL(glUniform1i(glGetUniformLocation(mToneMappingShader, "hdr"), true));
+//      GL(glUniform1i(glGetUniformLocation(mToneMappingShader, "hdr"), mHDR));
       GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), float(mExposure)));
       GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "gamma"), float(mGamma)));
       GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "hdrBuffer"), mFBO->texture()));
