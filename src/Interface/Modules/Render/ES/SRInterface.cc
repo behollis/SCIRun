@@ -1398,14 +1398,14 @@ namespace SCIRun {
       GL(glUseProgram(mToneMappingShader));
 
 //      GLboolean hdr = true; // Change with 'Space'
-//      GLfloat exposure = 0.4f; // Change with Q and E
-//      exposure += 0.1;
+//        mGamma = 0.4f; // Change with Q and E
+//        mExposure = 5.0;
 
       //     glActiveTexture(GL_TEXTURE0);
       //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
-      GL(glUniform1i(glGetUniformLocation(mToneMappingShader, "hdr"), mHDR));
-      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), mExposure));
-      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), mGamma));
+      GL(glUniform1i(glGetUniformLocation(mToneMappingShader, "hdr"), true));
+      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "exposure"), float(mExposure)));
+      GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "gamma"), float(mGamma)));
       GL(glUniform1f(glGetUniformLocation(mToneMappingShader, "hdrBuffer"), mFBO->texture()));
 
       glBindFramebuffer(GL_FRAMEBUFFER, 0); //render to gl context buffer

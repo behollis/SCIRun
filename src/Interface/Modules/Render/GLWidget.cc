@@ -276,9 +276,9 @@ void GLWidget::initializeGL()
      std::string frag("#version 330 core\n"
          "out vec4 color;\n"
          "in vec2 TexCoords; uniform sampler2D hdrBuffer;\n "
-         "uniform float exposure; uniform bool hdr; uniform float gamma;\n "
+         "uniform float exposure; uniform bool hdr;\n"
+         "uniform float gamma;\n "
          "void main(){\n "
-         "//float gamma = 5.0;\n "
          "vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb\n;"
          "//color = vec4(hdrColor, 1.0);\n"
          "//vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;\n "
@@ -299,14 +299,14 @@ void GLWidget::initializeGL()
      // Bind shaders
      glUseProgram(mToneMapShaders);
 
-//    GLboolean hdr = true; // Change with 'Space'
+//     GLboolean hdr = true; // Change with 'Space'
 //     GLfloat exposure = 5.0f; // Change with Q and E
 
 //     glActiveTexture(GL_TEXTURE0);
 //     glBindTexture(GL_TEXTURE_2D, colorBuffer);
-     glUniform1i(glGetUniformLocation(mToneMapShaders, "hdr"), hdr);
-     glUniform1f(glGetUniformLocation(mToneMapShaders, "exposure"), exposure);
-     glUniform1f(glGetUniformLocation(mToneMapShaders, "gamma"), gamma);
+     glUniform1i(glGetUniformLocation(mToneMapShaders, "hdr"), true);
+     glUniform1f(glGetUniformLocation(mToneMapShaders, "exposure"), float(exposure));
+     glUniform1f(glGetUniformLocation(mToneMapShaders, "gamma"), float(gamma));
      glUniform1f(glGetUniformLocation(mToneMapShaders, "hdrBuffer"), mFBO->texture());
 }
 
